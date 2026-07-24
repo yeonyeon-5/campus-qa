@@ -1,0 +1,24 @@
+  </main>
+  <footer class="footer">
+    <div class="container">校园问答 · 你的问题，大家来帮</div>
+  </footer>
+<script>
+var suggestTimer=null;
+function handleSearchInput(val){
+  var dd=document.getElementById('suggestDropdown');
+  if(val.trim()===''){window.location.href='/';return}
+  clearTimeout(suggestTimer);
+  suggestTimer=setTimeout(function(){
+    fetch('/api/suggest?q='+encodeURIComponent(val)).then(function(r){return r.json()}).then(function(data){
+      if(!data.length){dd.style.display='none';return}
+      var html=''; data.forEach(function(item){html+='<a href="/post/'+item.id+'" class="suggest-item">'+escHtml(item.title)+'</a>'});
+      html+='<a href="/?q='+encodeURIComponent(val)+'" class="suggest-item" style="color:var(--p);font-weight:600">🔍 搜索全部「'+escHtml(val)+'」</a>';
+      dd.innerHTML=html;dd.style.display='block';
+    });
+  },200);
+}
+function escHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+document.addEventListener('click',function(e){var dd=document.getElementById('suggestDropdown');if(dd&&!e.target.closest('.nav-search'))dd.style.display='none'});
+</script>
+</body>
+</html>

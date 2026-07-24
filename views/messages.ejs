@@ -1,0 +1,110 @@
+<%- include('partials/header') %>
+
+<div class="page-header">
+  <h1>消息中心</h1>
+  <a href="/" class="text-link">← 返回首页</a>
+</div>
+
+<% if (success) { %>
+  <div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= success %></div>
+<% } %>
+<% if (error) { %>
+  <div class="toast toast-error" id="toast"><span class="toast-icon">!</span><%= error %></div>
+<% } %>
+
+<div class="tabs">
+  <a href="/messages?tab=notifications" class="tab <%= tab === 'notifications' ? 'active' : '' %>">📬 回复通知 <span class="badge badge-new" style="margin-left:6px"><%= notifications.length %></span></a>
+  <a href="/messages?tab=chats" class="tab <%= tab === 'chats' ? 'active' : '' %>">💬 私聊</a>
+</div>
+
+<% if (tab === 'notifications') { %>
+  <% if (notifications.length === 0) { %>
+    <div class="msg-empty">还没有人回复你的帖子</div>
+  <% } else { %>
+    <div class="msg-list">
+      <% notifications.forEach(n => { %>
+        <a href="/post/<%= n.post_id %>" class="msg-card">
+          <a href="/user/<%= encodeURIComponent(n.author) %>" style="text-decoration:none" onclick="event.stopPropagation()"><span class="msg-avatar" style="background:var(--avatar<%= getAvatar(n.author) %>)"><%= n.author[0] %></span></a>
+          <div class="msg-body">
+            <div class="msg-from"><%= n.author %> 回复了你的帖子</div>
+            <div class="msg-preview"><%= n.content %></div>
+            <div class="msg-related">帖子：<%= n.post_title %></div>
+          </div>
+          <span class="msg-time"><%= n.created_at %></span>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+<% } else { %>
+  <% if (chatWith) { %>
+    <!-- 私聊对话 -->
+    <div style="margin-bottom:14px">
+      <a href="/messages?tab=chats" class="text-link">← 返回聊天列表</a>
+    </div>
+    <div class="chat-header">
+      <a href="/user/<%= encodeURIComponent(chatWith) %>" style="text-decoration:none"><span class="msg-avatar" style="width:36px;height:36px;border-radius:10px;background:var(--avatar<%= getAvatar(chatWith) %>)"><%= chatWith[0] %></span></a>
+      <span class="chat-with"><%= chatWith %></span>
+      <span style="color:var(--t3);font-size:12px;margin:0 6px">·</span>
+      <span style="font-size:12px;color:var(--t3)">我</span>
+      <span class="msg-avatar" style="width:20px;height:20px;border-radius:6px;font-size:10px;background:var(--avatar<%= getAvatar(who) %>)"><%= who[0] %></span>
+    </div>
+    <div class="chat-list" id="chatList">
+      <% if (chatMessages.length === 0) { %>
+        <div class="msg-empty">暂无对话，发条消息吧</div>
+      <% } else { %>
+        <% chatMessages.forEach(m => { %>
+          <div class="chat-bubble <%= m.from === who ? 'me' : 'you' %>"><%= m.content %></div>
+          <div class="chat-time"><%= m.created_at %></div>
+        <% }) %>
+      <% } %>
+    </div>
+    <form method="POST" action="/messages/send" class="chat-form">
+      <input type="hidden" name="to" value="<%= chatWith %>">
+      <input type="text" name="content" class="form-input" placeholder="输入消息..." required autofocus style="border-radius:24px">
+      <button type="submit" class="btn btn-primary">发送</button>
+    </form>
+  <% } else { %>
+    <!-- 聊天列表 -->
+    <% if (chatList.length === 0) { %>
+      <div class="msg-empty">
+        <p>还没有私聊对话</p>
+        <p style="font-size:12px;margin-top:4px">在帖子详情页看到感兴趣的人？发起聊天吧</p>
+      </div>
+    <% } else { %>
+      <div class="msg-list">
+        <% chatList.forEach(c => { %>
+          <a href="/messages?tab=chats&chat=<%= encodeURIComponent(c.name) %>" class="msg-card">
+            <a href="/user/<%= encodeURIComponent(c.name) %>" style="text-decoration:none" onclick="event.stopPropagation()"><span class="msg-avatar" style="background:var(--avatar<%= getAvatar(c.name) %>)"><%= c.name[0] %></span></a>
+            <div class="msg-body">
+              <div class="msg-from"><%= c.name %></div>
+              <div class="msg-preview"><%= c.lastMsgFrom === who ? '我：' : '' %><%= c.lastMsg %></div>
+            </div>
+            <span class="msg-time"><%= c.time %></span>
+          </a>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <!-- 发起新聊天 -->
+    <div style="margin-top:24px;background:var(--card);border:1px solid var(--b);border-radius:18px;padding:18px 20px;box-shadow:var(--sh)">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:10px">发起新私聊</h3>
+      <form method="GET" action="/messages" class="chat-form">
+        <input type="hidden" name="tab" value="chats">
+        <input type="text" name="chat" class="form-input" placeholder="输入对方的昵称" required style="border-radius:20px">
+        <button type="submit" class="btn btn-primary btn-sm">开始聊天</button>
+      </form>
+      <p style="font-size:11px;color:var(--t3);margin-top:6px">输入对方昵称后即可开始私聊</p>
+    </div>
+  <% } %>
+<% } %>
+
+<%- include('partials/footer') %>
+
+<script>
+(function(){
+  var t=document.getElementById('toast');
+  if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)'},2500)}
+  var c=document.getElementById('chatList');
+  if(c)c.scrollTop=c.scrollHeight;
+})();
+</script>

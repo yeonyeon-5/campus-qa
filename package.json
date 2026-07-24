@@ -1,0 +1,19 @@
+{
+  "name": "campus-qa",
+  "version": "1.0.0",
+  "description": "校园问答论坛 - 大学生发帖求助、互相回复",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "npx nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "multer": "^2.2.0"
+  }
+}

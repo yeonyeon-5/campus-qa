@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+
+<div class="page-header">
+  <h1>发起提问</h1>
+  <a href="/" class="text-link">← 返回首页</a>
+</div>
+
+<% if (error) { %>
+  <div class="toast toast-error" id="toast"><span class="toast-icon">!</span><%= error %></div>
+<% } %>
+
+<form method="POST" action="/post" class="form-card">
+  <div class="form-group">
+    <label>发帖身份</label>
+    <input type="text" class="form-input" value="<%= currentUser %>" disabled style="background:#f5f5f4;color:#a8a29e">
+  </div>
+
+  <div class="form-group">
+    <label for="title">问题标题 <span class="req">*</span></label>
+    <input type="text" id="title" name="title" class="form-input" placeholder="用一句话概括你的问题（最多 100 字）" maxlength="100" required value="<%= form.title || '' %>" autofocus>
+  </div>
+
+  <div class="form-group">
+    <label for="content">问题详情 <span class="req">*</span></label>
+    <textarea id="content" name="content" class="form-input form-textarea" placeholder="详细描述你的问题，越具体越容易得到有用的回答..." rows="6" required><%= form.content || '' %></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary btn-lg">发布问题</button>
+  </div>
+</form>
+
+<%- include('partials/footer') %>
+
+<script>
+(function(){
+  var t=document.getElementById('toast');
+  if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)'},2500)}
+})();
+</script>

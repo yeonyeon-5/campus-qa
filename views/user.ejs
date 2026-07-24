@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<div class="page-header">
+  <h1>用户主页</h1>
+  <a href="javascript:history.back()" class="text-link">← 返回</a>
+</div>
+
+<div class="id-bar">
+  <span class="msg-avatar" style="width:48px;height:48px;border-radius:14px;font-size:20px;background:var(--avatar<%= getAvatar(name) %>)"><%= name[0] %></span>
+  <div>
+    <strong style="font-size:18px"><%= info && info.realname ? info.realname : name %></strong>
+    <% if (info && info.realname) { %><span style="color:var(--t3);font-size:13px">@<%= name %></span><% } %>
+    <div style="color:var(--t3);font-size:13px">
+      <%= posts.length %> 篇帖子 · <%= replyCount %> 条回复
+      <% if (info && info.studentId) { %> · 学号 <%= info.studentId %><% } %>
+    </div>
+  </div>
+  <a href="/messages?tab=chats&chat=<%= encodeURIComponent(name) %>" class="btn btn-primary btn-sm" style="margin-left:auto">💬 私聊</a>
+</div>
+
+<% if (posts.length === 0) { %>
+  <div class="empty-state" style="padding:40px">
+    <p style="color:var(--t3)">ta 还没有发过帖子</p>
+  </div>
+<% } else { %>
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">ta 的帖子</h3>
+  <div class="post-list">
+    <% posts.forEach((post, i) => { %>
+      <a href="/post/<%= post.id %>" class="post-card">
+        <span class="post-card-avatar" style="background:var(--avatar<%= getAvatar(post.author) %>)"><%= post.author[0] %></span>
+        <div class="post-card-main">
+          <h3 class="post-card-title"><%= post.title %></h3>
+          <p class="post-card-preview"><%= post.content.length > 100 ? post.content.slice(0, 100) + '...' : post.content %></p>
+          <div class="post-card-meta">
+            <span><%= post.reply_count %> 回复</span>
+            <span class="post-card-dot">·</span>
+            <span><%= post.created_at %></span>
+          </div>
+        </div>
+      </a>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

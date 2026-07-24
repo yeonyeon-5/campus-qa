@@ -1,0 +1,182 @@
+<%- include('partials/header') %>
+
+<div class="page-header">
+  <h1>个人中心</h1>
+  <a href="/" class="text-link">← 返回首页</a>
+</div>
+
+<% if (success) { %>
+  <div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= success %></div>
+<% } %>
+<% if (error) { %>
+  <div class="toast toast-error" id="toast"><span class="toast-icon">!</span><%= error %></div>
+<% } %>
+
+<div class="id-bar">
+  <div style="position:relative;cursor:pointer" onclick="event.stopPropagation();var p=document.getElementById('avatarPicker');p.style.display=p.style.display==='block'?'none':'block'">
+    <% var avUrl = getAvatarUrl(who); %>
+    <% if (avUrl) { %>
+      <img src="<%= avUrl %>" style="width:48px;height:48px;border-radius:14px;object-fit:cover">
+    <% } else { %>
+      <span class="msg-avatar" style="width:48px;height:48px;border-radius:14px;font-size:20px;background:var(--avatar<%= getAvatar(who) %>)"><%= who[0] %></span>
+    <% } %>
+    <span style="position:absolute;bottom:-2px;right:-2px;background:var(--card);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:var(--sh)">✎</span>
+  </div>
+  <div>
+    <strong style="font-size:16px"><%= who %></strong>
+    <div style="color:var(--t3);font-size:13px"><%= posts.length %> 帖子 · <%= replies.length %> 回复 · <%= bookmarks.length %> 收藏</div>
+  </div>
+</div>
+
+<div id="avatarPicker" style="display:none;background:var(--card);border:1px solid var(--b);border-radius:16px;padding:16px;margin-bottom:20px;box-shadow:var(--sh);position:relative">
+  <button onclick="document.getElementById('avatarPicker').style.display='none'" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--t3);line-height:1">×</button>
+  <p style="font-size:13px;font-weight:600;margin-bottom:10px">上传头像</p>
+  <form method="POST" action="/me/avatar-upload" enctype="multipart/form-data" style="margin-bottom:12px">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="file" name="avatar" accept="image/*" style="font-size:12px;flex:1">
+      <button type="submit" class="btn btn-primary btn-sm">上传</button>
+    </div>
+    <p style="font-size:11px;color:var(--t3);margin-top:4px">支持 jpg/png/gif/webp，最大 2MB</p>
+  </form>
+  <p style="font-size:13px;font-weight:600;margin-bottom:8px">或选择颜色</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <% for (var i=0; i<5; i++) { %>
+      <form method="POST" action="/me/avatar" style="display:inline">
+        <input type="hidden" name="color" value="<%= i %>">
+        <button type="submit" style="width:36px;height:36px;border-radius:10px;border:3px solid <%= (!avUrl && getAvatar(who)===i) ? 'var(--p)' : 'transparent' %>;background:var(--avatar<%= i %>);cursor:pointer;font-size:16px;color:#fff;font-weight:700"><%= who[0] %></button>
+      </form>
+    <% } %>
+  </div>
+  <button onclick="document.getElementById('avatarPicker').style.display='none'" style="margin-top:10px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px">关闭</button>
+</div>
+
+<div class="tabs">
+  <a href="/me?tab=posts" class="tab <%= tab === 'posts' ? 'active' : '' %>">我的帖子</a>
+  <a href="/me?tab=replies" class="tab <%= tab === 'replies' ? 'active' : '' %>">我的回复</a>
+  <a href="/me?tab=bookmarks" class="tab <%= tab === 'bookmarks' ? 'active' : '' %>">我的收藏</a>
+</div>
+
+<% if (tab === 'posts') { %>
+  <% if (posts.length === 0) { %>
+    <div class="empty-state" style="padding:40px">
+      <p style="color:var(--t3)">还没有发过帖子</p>
+      <a href="/new" class="btn btn-primary btn-sm">去发帖</a>
+    </div>
+  <% } else { %>
+    <div class="post-list">
+      <% posts.forEach(post => { %>
+        <div class="post-card">
+          <span class="post-card-avatar" style="background:var(--avatar<%= getAvatar(post.author) %>)"><%= post.author[0] %></span>
+          <div class="post-card-main">
+            <a href="/post/<%= post.id %>" style="text-decoration:none;color:inherit">
+              <h3 class="post-card-title"><%= post.title %></h3>
+              <p class="post-card-preview"><%= post.content.length > 100 ? post.content.slice(0, 100) + '...' : post.content %></p>
+            </a>
+            <div class="post-card-meta">
+              <span><%= post.reply_count %> 条回复</span>
+              <span class="post-card-dot">·</span>
+              <span><%= post.created_at %></span>
+              <% if (post.is_hidden) { %><span class="badge badge-no">已隐藏</span><% } %>
+              <form method="POST" action="/me/delete-post/<%= post.id %>" onsubmit="return confirm('确定删除帖子？')" style="margin-left:auto;display:inline">
+                <button type="submit" class="btn btn-sm btn-warning">删除</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+<% } else if (tab === 'replies') { %>
+  <% if (replies.length === 0) { %>
+    <div class="empty-state" style="padding:40px">
+      <p style="color:var(--t3)">还没有发表过回复</p>
+    </div>
+  <% } else { %>
+    <div class="reply-list">
+      <% replies.forEach(r => { %>
+        <div class="reply-card">
+          <div class="reply-top">
+            <span class="reply-author">
+              <span class="reply-avatar" style="background:var(--avatar<%= getAvatar(r.author) %>)"><%= r.author[0] %></span>
+              <%= r.author %>
+            </span>
+            <span class="reply-time"><%= r.created_at %></span>
+            <form method="POST" action="/me/delete-reply/<%= r.id %>" onsubmit="return confirm('确定删除这条回复？')" style="margin-left:auto">
+              <button type="submit" class="btn btn-sm btn-warning">删除</button>
+            </form>
+          </div>
+          <div class="reply-text"><%= r.content %></div>
+          <div class="reply-time" style="margin-top:4px">
+            回复了帖子：
+            <% if (!r.post_hidden) { %>
+              <a href="/post/<%= r.post_id %>" style="color:var(--s);text-decoration:none"><%= r.post_title %></a>
+            <% } else { %>
+              <%= r.post_title %>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+<% } else { %>
+  <% if (bookmarks.length === 0) { %>
+    <div class="empty-state" style="padding:40px">
+      <p style="color:var(--t3)">还没有收藏帖子</p>
+      <p style="font-size:12px;color:var(--t3)">在帖子详情页点击 ⭐ 收藏即可</p>
+    </div>
+  <% } else { %>
+    <div class="post-list">
+      <% bookmarks.forEach(b => { %>
+        <a href="/post/<%= b.id %>" class="post-card">
+          <span class="post-card-avatar" style="background:var(--avatar<%= getAvatar(b.author) %>)"><%= b.author[0] %></span>
+          <div class="post-card-main">
+            <h3 class="post-card-title"><%= b.title %></h3>
+            <p class="post-card-preview"><%= b.content.length > 100 ? b.content.slice(0, 100) + '...' : b.content %></p>
+            <div class="post-card-meta">
+              <span class="post-card-author"><%= b.author %></span>
+              <span class="post-card-dot">·</span>
+              <span><%= b.reply_count %> 回复</span>
+              <span class="post-card-dot">·</span>
+              <span>收藏于 <%= b.bookmarked_at %></span>
+            </div>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+<% } %>
+
+<% if (notifications.length > 0) { %>
+  <div style="margin-top:32px">
+    <h3 style="font-size:17px;font-weight:700;margin-bottom:12px">📬 你的帖子有新回复</h3>
+    <div class="reply-list">
+      <% notifications.forEach(r => { %>
+        <a href="/post/<%= r.post_id %>" style="text-decoration:none;color:inherit">
+          <div class="reply-card" style="border-left:3px solid var(--p)">
+            <div class="reply-top">
+              <span class="reply-author">
+                <span class="reply-avatar" style="background:var(--avatar<%= getAvatar(r.author) %>)"><%= r.author[0] %></span>
+                <%= r.author %>
+              </span>
+              <span class="reply-time"><%= r.created_at %></span>
+            </div>
+            <div class="reply-text"><%= r.content %></div>
+            <div class="reply-time" style="margin-top:4px">回复了你的帖子「<%= r.post_title %>」</div>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>
+
+<script>
+(function(){
+  var t=document.getElementById('toast');
+  if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)'},2500)}
+  var p=document.getElementById('avatarPicker');
+  document.addEventListener('click',function(e){if(p&&!e.target.closest('#avatarPicker')&&!e.target.closest('.id-bar [onclick]'))p.style.display='none'});
+})();
+</script>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册 · 校园问答</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#fff5f0 0%,#fef9f5 30%,#faf5ff 70%,#f0f4ff 100%);padding:20px}
+    .login-card{background:#fff;border-radius:28px;padding:44px 40px 36px;width:100%;max-width:420px;box-shadow:0 4px 40px rgba(0,0,0,.06),0 1px 4px rgba(0,0,0,.04);text-align:center;position:relative;overflow:hidden}
+    .login-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f97316,#ec4899,#6366f1)}
+    .login-logo{width:56px;height:56px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+    .login-logo svg{width:32px;height:32px;color:#f97316}
+    .login-title{font-size:26px;font-weight:900;letter-spacing:-.02em;margin-bottom:4px;color:#1c1917}
+    .login-sub{font-size:14px;color:#a8a29e;margin-bottom:28px}
+    .login-form{text-align:left}
+    .login-form .form-group{margin-bottom:14px}
+    .login-form label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:#57534e}
+    .login-input{width:100%;padding:11px 14px;font-size:14px;border:2px solid #f1e8e4;border-radius:12px;background:#fafaf9;color:#1c1917;font-family:inherit;outline:none;transition:all .2s}
+    .login-input:focus{border-color:#f97316;background:#fff;box-shadow:0 0 0 4px rgba(249,115,22,.08)}
+    .login-input::placeholder{color:#d6d3d1}
+    .login-btn{width:100%;padding:12px;font-size:15px;font-weight:700;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-family:inherit;box-shadow:0 4px 16px rgba(249,115,22,.3);transition:all .25s;margin-top:4px}
+    .login-btn:hover{box-shadow:0 6px 24px rgba(249,115,22,.45);transform:translateY(-1px)}
+    .login-error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;text-align:center}
+    .login-footer{font-size:12px;color:#a8a29e;margin-top:16px}
+    .login-footer a{color:#f97316;text-decoration:none;font-weight:600}
+  </style>
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 32 32" fill="none"><rect x="2" y="10" width="28" height="18" rx="3" fill="white" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 014-4h0a4 4 0 014 4v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 14h28" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="20" r="2" fill="currentColor"/></svg>
+    </div>
+    <h1 class="login-title">注册账号</h1>
+    <p class="login-sub">本社区实名制，请认真填写</p>
+    <% if (error) { %><div class="login-error"><%= error %></div><% } %>
+    <form method="POST" action="/register" class="login-form">
+      <div class="form-group">
+        <label for="realname">真实姓名 <span style="color:#ef4444">*</span></label>
+        <input type="text" id="realname" name="realname" class="login-input" placeholder="请输入真实姓名" maxlength="20" required autofocus value="<%= form.realname || '' %>">
+      </div>
+      <div class="form-group">
+        <label for="studentId">学号</label>
+        <input type="text" id="studentId" name="studentId" class="login-input" placeholder="选填" maxlength="30" value="<%= form.studentId || '' %>">
+      </div>
+      <div class="form-group">
+        <label for="username">登录账号</label>
+        <input type="text" id="username" name="username" class="login-input" placeholder="2-20 个字符，登录时使用" maxlength="20" required value="<%= form.username || '' %>">
+      </div>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password" class="login-input" placeholder="至少 4 位" required>
+      </div>
+      <div class="form-group">
+        <label for="password2">确认密码</label>
+        <input type="password" id="password2" name="password2" class="login-input" placeholder="再次输入密码" required>
+      </div>
+      <button type="submit" class="login-btn">注册</button>
+    </form>
+    <p class="login-footer">已有账号？<a href="/login">去登录</a></p>
+  </div>
+</body>
+</html>
