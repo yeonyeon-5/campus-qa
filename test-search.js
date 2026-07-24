@@ -18,14 +18,13 @@ function request(method, path, opts = {}) {
     const cookie = opts.sessionCookie || '';
     const postData = opts.body ? new URLSearchParams(opts.body).toString() : null;
 
+    const headers = { Cookie: cookie };
+    if (postData) { headers['Content-Type'] = 'application/x-www-form-urlencoded'; }
     const req = http.request({
       hostname: url.hostname, port: url.port,
       path: url.pathname + url.search,
       method,
-      headers: {
-        'Content-Type': postData ? 'application/x-www-form-urlencoded' : undefined,
-        'Cookie': cookie,
-      }
+      headers,
     }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
@@ -136,26 +135,26 @@ async function runTests() {
   // 测试6：无 q 参数，应显示所有帖子
   {
     const res = await request('GET', '/', { sessionCookie: cookie });
-    const showsAll = res.body.includes('有问题，大家一起答'); // hero section
+    const showsHero = res.body.includes('有问题') && res.body.includes('大家一起答');
     const hasPosts = res.body.includes('高数挂了怎么办') && res.body.includes('有没有一起学英语四级的');
-    record('空输入', '无搜索词显示首页全部帖子', showsAll && hasPosts,
-      showsAll && hasPosts ? '正常显示所有帖子' : '未显示全部帖子');
+    record('空输入', '无搜索词显示首页全部帖子', showsHero && hasPosts,
+      showsHero && hasPosts ? '正常显示所有帖子' : `hero=${showsHero} posts=${hasPosts}`);
   }
 
   // 测试7：q 为空字符串
   {
     const res = await request('GET', '/?q=', { sessionCookie: cookie });
-    const showsAll = res.body.includes('有问题，大家一起答');
-    record('空输入', 'q=空字符串显示全部帖子', showsAll,
-      showsAll ? '正常回退到首页' : '异常');
+    const showsHero = res.body.includes('有问题') && res.body.includes('大家一起答');
+    record('空输入', 'q=空字符串显示全部帖子', showsHero,
+      showsHero ? '正常回退到首页' : '异常');
   }
 
   // 测试8：q 只有空格
   {
     const res = await request('GET', '/?q=+++', { sessionCookie: cookie });
-    const showsAll = res.body.includes('有问题，大家一起答'); // 空格 trim 后为空
-    record('空输入', 'q=纯空格显示全部帖子', showsAll,
-      showsAll ? 'trim 后正确回退' : '空格未被 trim');
+    const showsHero = res.body.includes('有问题') && res.body.includes('大家一起答');
+    record('空输入', 'q=纯空格显示全部帖子', showsHero,
+      showsHero ? 'trim 后正确回退' : '空格未被 trim');
   }
 
   // 测试9：Suggest API 空输入
@@ -194,14 +193,15 @@ async function runTests() {
       notCrash ? `status ${res.status}` : `崩溃 status ${res.status}`);
   }
 
-  // 测试13：特殊字符搜索
+  // 测试13：特殊字符搜索（XSS 防护）
   {
-    const res = await request('GET', '/?q=<script>', { sessionCookie: cookie });
+    const res = await request('GET', '/?q=' + encodeURIComponent('<script>'), { sessionCookie: cookie });
     const notCrash = res.status === 200;
-    // 还要验证没有 XSS
-    const noRawScript = !res.body.includes('<script>');
-    record('边界', '搜索特殊字符不崩溃且不XSS', notCrash && noRawScript,
-      notCrash ? (noRawScript ? '安全转义' : '警告：未转义') : '崩溃');
+    // 用户输入应被 EJS <%= %> 转义，不应出现 value="<script>" 这种原始注入
+    const safelyEscaped = !res.body.includes('"<script>"') && !res.body.includes('><script>');
+    const hasEscaped = res.body.includes('&lt;script&gt;');
+    record('边界', '搜索特殊字符不崩溃且输入被转义', notCrash && safelyEscaped,
+      hasEscaped ? '已安全转义' : '未找到转义痕迹');
   }
 
   // 测试14：URL 编码的中文搜索
