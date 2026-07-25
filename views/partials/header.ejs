@@ -22,7 +22,6 @@
       <div class="nav-links">
         <a href="/" class="nav-link">首页</a>
         <a href="/qa" class="nav-link <%= currentPath === '/qa' ? 'active' : '' %>">问答</a>
-        <a href="/blog" class="nav-link <%= currentPath.startsWith('/blog') ? 'active' : '' %>">文献</a>
         <a href="/messages" class="nav-link <%= currentPath === '/messages' ? 'active' : '' %>">消息</a>
         <a href="/announcements" class="nav-link <%= currentPath === '/announcements' ? 'active' : '' %>">公告</a>
         <% if (currentUser !== 'admin') { %>

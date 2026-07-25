@@ -1,11 +1,4 @@
-<%- include('partials/header') %>
-
-<!-- 面包屑导航 -->
-<nav class="breadcrumb">
-  <a href="/">首页</a>
-  <span class="breadcrumb-sep">›</span>
-  <span class="breadcrumb-current">文献博客</span>
-</nav>
+<%- include('partials/blog-header') %>
 
 <% if (success) { %>
   <div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= success %></div>
@@ -17,73 +10,59 @@
 <% if (query) { %>
   <div class="page-header">
     <h1>搜索「<%= query %>」</h1>
-    <a href="/blog" class="text-link">← 返回文献</a>
+    <a href="/blog" class="text-link">← 返回博客</a>
   </div>
 <% } else { %>
-  <div class="blog-hero">
-    <div class="hero-content">
-      <h1 class="hero-title">知识沉淀，<span class="blog-hero-highlight">文献共享</span></h1>
-      <p class="hero-sub">论文、笔记、教程……把你的学习积累分享给更多人</p>
-    </div>
-    <a href="/blog/new" class="btn btn-primary btn-lg hero-btn">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      发表文章
-    </a>
-    <div class="hero-stats"><span>共 <strong><%= articles.length %></strong> 篇文章</span></div>
+  <div class="page-header">
+    <h1>知识博客</h1>
+    <p style="color:var(--t2);font-size:14px;margin-top:4px">经验分享、技术笔记、读书心得——沉淀你的知识</p>
   </div>
 <% } %>
 
-<!-- 分类 Tab -->
-<% if (!query) { %>
-<div class="category-tabs">
-  <% categories.forEach(function(cat) { %>
-    <a href="/blog<%= cat === '全部' ? '' : '?cat=' + encodeURIComponent(cat) %>" class="category-tab <%= currentCat === cat ? 'active' : '' %>"><%= cat %></a>
+<!-- 分类筛选 -->
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">
+  <% categories.forEach(c => { %>
+    <a href="/blog<%= c !== '全部' ? '?cat=' + c : '' %>"
+       style="padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;
+              <%= (currentCat === c) ? 'background:var(--s);color:#fff' : 'background:var(--card);color:var(--t2);border:1px solid var(--b)' %>">
+      <%= c %>
+    </a>
   <% }) %>
 </div>
-<% } %>
 
 <% if (articles.length === 0) { %>
   <div class="empty-state">
-    <div class="empty-art">
-      <svg viewBox="0 0 120 80" fill="none" width="120" height="80"><rect x="20" y="10" width="80" height="55" rx="4" stroke="#cbd5e1" stroke-width="2"/><line x1="30" y1="22" x2="90" y2="22" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="32" x2="75" y2="32" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="42" x2="82" y2="42" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="52" x2="60" y2="52" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/><circle cx="100" cy="55" r="14" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/><line x1="92" y1="55" x2="108" y2="55" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/><line x1="100" y1="47" x2="100" y2="63" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/></svg>
-    </div>
-    <h2><%= query ? '没有找到相关文章' : '还没有文章' %></h2>
-    <p><%= query ? '换个关键词试试' : '成为第一个分享文献的人吧' %></p>
-    <% if (!query) { %><a href="/blog/new" class="btn btn-primary">发表文章</a><% } %>
+    <div class="empty-art" style="font-size:40px">📝</div>
+    <h2><%= query ? '没找到相关文章' : '还没有文章' %></h2>
+    <p><%= query ? '换个关键词试试' : '成为第一个分享知识的人吧' %></p>
+    <% if (!query) { %><a href="/blog/new" class="btn btn-primary">写文章</a><% } %>
   </div>
 <% } else { %>
   <div class="post-list">
-    <% articles.forEach(function(article) { %>
-      <a href="/blog/<%= article.id %>" class="article-card">
-        <span class="post-card-avatar" style="background: var(--avatar<%= getAvatar(article.author) %>)"><%= article.author[0] %></span>
+    <% articles.forEach(a => { %>
+      <a href="/blog/<%= a.id %>" class="post-card">
+        <span class="post-card-avatar" style="background:var(--avatar<%= (a.author||'').length % 5 %>)"><%= (a.author||'?')[0] %></span>
         <div class="post-card-main">
-          <h3 class="post-card-title"><%= article.title %></h3>
-          <p class="post-card-preview"><%= (article.summary || article.content).length > 100 ? (article.summary || article.content).slice(0, 100) + '...' : (article.summary || article.content) %></p>
+          <h3 class="post-card-title"><%= a.title %></h3>
+          <p class="post-card-preview"><%= (a.summary || a.content || '').length > 100 ? (a.summary || a.content).slice(0, 100) + '...' : (a.summary || a.content || '') %></p>
           <div class="post-card-meta">
-            <span class="post-card-author"><%= article.author %></span>
+            <span class="post-card-author"><%= a.author %></span>
             <span class="post-card-dot">·</span>
-            <span class="tag-badge tag-badge-<%= article.category %>"><%= article.category %></span>
+            <span><%= a.category || '其他' %></span>
             <span class="post-card-dot">·</span>
-            <span>👁 <%= article.views || 0 %></span>
+            <span>👁 <%= a.views || 0 %></span>
             <span class="post-card-dot">·</span>
-            <span><%= article.comment_count %> 评论</span>
-            <% if (article.likes && article.likes.length > 0) { %>
-              <span class="post-card-dot">·</span>
-              <span>👍 <%= article.likes.length %></span>
-            <% } %>
+            <span><%= a.comment_count || 0 %> 评论</span>
             <span class="post-card-dot">·</span>
-            <span><%= article.created_at %></span>
+            <span><%= a.created_at %></span>
           </div>
         </div>
-        <% if (article.comment_count > 0) { %>
-          <span class="post-card-badge" style="background:var(--sl);color:var(--sd)"><%= article.comment_count %></span>
-        <% } %>
       </a>
     <% }) %>
   </div>
 <% } %>
 
-<%- include('partials/footer') %>
+<%- include('partials/blog-footer') %>
 <script>
 (function(){var t=document.getElementById('toast');if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateY(-20px)'},2500)}})();
 </script>

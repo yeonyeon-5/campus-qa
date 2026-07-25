@@ -1,13 +1,13 @@
-<%- include('partials/header') %>
-
-<div class="page-header">
-  <h1>发表文章</h1>
-  <a href="/blog" class="text-link">← 返回文献</a>
-</div>
+<%- include('partials/blog-header') %>
 
 <% if (error) { %>
   <div class="toast toast-error" id="toast"><span class="toast-icon">!</span><%= error %></div>
 <% } %>
+
+<div class="page-header">
+  <h1>发表文章</h1>
+  <a href="/blog" class="text-link">← 返回博客</a>
+</div>
 
 <form method="POST" action="/blog" class="form-card">
   <div class="form-group">
@@ -28,7 +28,7 @@
         <option value="笔记" <%= form.category === '笔记' ? 'selected' : '' %>>笔记</option>
         <option value="教程" <%= form.category === '教程' ? 'selected' : '' %>>教程</option>
         <option value="资料" <%= form.category === '资料' ? 'selected' : '' %>>资料</option>
-        <option value="其他" <%= form.category === '其他' || !form.category ? 'selected' : '' %>>其他</option>
+        <option value="其他" <%= !form.category || form.category === '其他' ? 'selected' : '' %>>其他</option>
       </select>
     </div>
     <div class="form-group" style="flex:1">
@@ -47,7 +47,7 @@
   </div>
 </form>
 
-<%- include('partials/footer') %>
+<%- include('partials/blog-footer') %>
 <script>
-(function(){var t=document.getElementById('toast');if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)'},2500)}})();
+(function(){var t=document.getElementById('toast');if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateY(-20px)'},2500)}})();
 </script>
