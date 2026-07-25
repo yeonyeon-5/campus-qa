@@ -33,7 +33,7 @@
 
 <% if (query) { %>
   <div class="page-header">
-    <h1>搜索「<%= query %>」</h1>
+    <h1>搜索「<%= query %>」<span style="font-size:14px;color:var(--t2);font-weight:400;margin-left:8px">— 找到 <%= posts.length %> 个相关帖子</span></h1>
     <a href="/" class="text-link">← 返回首页</a>
   </div>
 <% } else { %>
