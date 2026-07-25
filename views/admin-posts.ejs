@@ -1,0 +1,37 @@
+<%- include('partials/admin-layout', { page: 'posts' }) %>
+
+<% if (message) { %><div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= message %></div><% } %>
+
+<div class="page-card">
+  <h2>📝 全部帖子 <span style="font-weight:400;font-size:13px;color:var(--t3)"><%= posts.length %> 条</span></h2>
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead><tr><th>ID</th><th>标题</th><th>作者</th><th>状态</th><th>回复</th><th>时间</th><th>操作</th></tr></thead>
+    <tbody>
+      <% posts.forEach(post => { %>
+        <%
+          var sl = '可见', sc = 'badge-ok';
+          if (post.status === 'pending') { sl = '审核中'; sc = 'badge-new'; }
+          else if (post.status === 'rejected') { sl = '已驳回'; sc = 'badge-no'; }
+          else if (post.is_hidden) { sl = '已隐藏'; sc = 'badge-no'; }
+        %>
+        <tr class="<%= post.is_hidden && post.status !== 'rejected' ? 'row-hidden' : '' %>">
+          <td><%= post.id %></td>
+          <td><a href="/post/<%= post.id %>" style="color:var(--pd);text-decoration:none;font-weight:600"><%= post.title %></a></td>
+          <td><%= post.author %></td>
+          <td><span class="badge <%= sc %>"><%= sl %></span></td>
+          <td><%= post.reply_count %></td>
+          <td><%= post.created_at %></td>
+          <td style="display:flex;gap:4px">
+            <form method="POST" action="/admin/posts/<%= post.id %>/toggle"><button class="btn btn-sm <%= post.is_hidden ? 'btn-success' : 'btn-warning' %>"><%= post.is_hidden ? '显示' : '隐藏' %></button></form>
+            <form method="POST" action="/admin/posts/<%= post.id %>/delete" onsubmit="return confirm('确定永久删除帖子 #<%= post.id %>？此操作不可恢复！')"><button class="btn btn-sm" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca">删除</button></form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (posts.length === 0) { %><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--t3)">暂无帖子</td></tr><% } %>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<%- include('partials/admin-footer') %>

@@ -1,0 +1,178 @@
+<%- include('partials/admin-layout', { page: 'reports' }) %>
+
+<% if (message) { %><div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= message %></div><% } %>
+
+<style>
+.r-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--card);border:1px solid var(--b);border-radius:12px;padding:4px}
+.r-tabs a{flex:1;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;color:var(--t2);white-space:nowrap}
+.r-tabs a.active,.r-tabs a:hover{background:var(--pl);color:var(--pd)}
+.r-tabs a .count{font-size:11px;padding:1px 8px;border-radius:8px;margin-left:4px}
+.r-tabs a .count.danger{background:#fef2f2;color:#dc2626}
+.r-tabs a .count.ok{background:#ecfdf5;color:#065f46}
+
+.rank-card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:16px 20px;margin-bottom:10px;box-shadow:var(--sh)}
+.rank-card.danger{border-left:4px solid #ef4444;background:#fffdfd}
+.rank-card.warn{border-left:4px solid #f59e0b}
+.rank-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.rank-top .target{font-size:15px;font-weight:700}
+.rank-top .target a{color:var(--t);text-decoration:none}
+.rank-top .target a:hover{color:var(--pd)}
+.rank-count{font-weight:800;font-size:14px}
+.rank-count.c3{color:#ef4444}
+.rank-count.c5{color:#dc2626;font-size:18px}
+.rank-reporters{font-size:12px;color:var(--t3)}
+.rank-reasons{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.rank-reasons .reason{font-size:13px;color:var(--t2);padding:6px 10px;background:#fafaf9;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rank-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+
+.hist-card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:14px 18px;margin-bottom:8px;box-shadow:var(--sh);opacity:.75}
+.hist-card .badge-type{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.hist-card .badge-type.post{background:#fef3c7;color:#92400e}
+.hist-card .badge-type.user{background:#eef2ff;color:var(--sd)}
+</style>
+
+<!-- Tabs -->
+<div class="r-tabs">
+  <a href="/admin/reports?tab=active" class="<%= tab !== 'history' ? 'active' : '' %>">
+    ⚠️ 待处理
+    <span class="count danger"><%= stats.length %></span>
+  </a>
+  <a href="/admin/reports?tab=history" class="<%= tab === 'history' ? 'active' : '' %>">
+    📋 历史记录
+    <span class="count ok"><%= history.length %></span>
+  </a>
+</div>
+
+<%
+var categories = ['违规内容','人身攻击','垃圾广告','考试作弊','虚假信息','隐私泄露','其他'];
+var catColors = {'违规内容':'#dc2626','人身攻击':'#ea580c','垃圾广告':'#ca8a04','考试作弊':'#0891b2','虚假信息':'#7c3aed','隐私泄露':'#db2777','其他':'#64748b'};
+var activeCat = typeof catFilter !== 'undefined' ? catFilter : '';
+%>
+
+<% if (tab === 'history') { %>
+  <!-- 历史记录 -->
+  <div class="page-card">
+    <h2>📋 已处理记录 <span style="font-weight:400;font-size:13px;color:var(--t3)"><%= history.length %> 条</span></h2>
+    <% if (history.length === 0) { %>
+      <div style="text-align:center;padding:32px;color:var(--t3)">暂无记录</div>
+    <% } else { %>
+      <% history.forEach(function(r){ %>
+        <div class="hist-card">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="badge-type <%= r.type %>"><%= r.type === 'post' ? '帖子' : '用户' %></span>
+            <strong><%= r.target_title %></strong>
+            <span style="font-size:12px;color:var(--t3)">被 <%= r.reporter %> 举报</span>
+            <span style="font-size:12px;color:var(--t3);margin-left:auto"><%= r.created_at %></span>
+          </div>
+          <div style="font-size:13px;color:var(--t2);margin-top:4px"><%= r.reason %></div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+<% } else { %>
+  <!-- 类别筛选 -->
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+    <a href="/admin/reports" class="btn btn-sm <%= !activeCat ? 'btn-primary' : 'btn-ghost' %>">全部</a>
+    <% categories.forEach(function(c){ %>
+      <a href="/admin/reports?cat=<%= encodeURIComponent(c) %>" class="btn btn-sm <%= activeCat === c ? 'btn-primary' : 'btn-ghost' %>" style="<%= activeCat === c ? '' : 'border-color:' + catColors[c] + ';color:' + catColors[c] %>"><%= c %></a>
+    <% }) %>
+  </div>
+
+  <!-- 待处理：按举报数排名 -->
+  <% var postStats = stats.filter(function(s){return s.type === 'post'}); %>
+  <% var userStats = stats.filter(function(s){return s.type === 'user'}); %>
+
+  <% if (stats.length === 0) { %>
+    <div class="page-card">
+      <div style="text-align:center;padding:40px;color:var(--t3)">✅ 没有待处理的举报</div>
+    </div>
+  <% } %>
+
+  <!-- 举报帖子 -->
+  <% if (postStats.length > 0) { %>
+  <div class="page-card">
+    <h2>📝 举报帖子排名 <span style="font-weight:400;font-size:13px;color:var(--t3)"><%= postStats.length %> 个目标</span></h2>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:12px">≥3次自动下架 · ≥5次自动删除</p>
+    <% postStats.forEach(function(s, i){ %>
+      <div class="rank-card <%= s.count >= 5 ? 'danger' : s.count >= 3 ? 'warn' : '' %>">
+        <div class="rank-top">
+          <div class="target">
+            <span style="color:var(--t3)">#<%= i+1 %></span>
+            <a href="/post/<%= s.target_id %>"><%= s.target_title %></a>
+          </div>
+          <span class="rank-count <%= s.count >= 5 ? 'c5' : s.count >= 3 ? 'c3' : '' %>">🔥 <%= s.count %> 次举报</span>
+        </div>
+        <div class="rank-reporters">举报人：<%= s.reports.map(function(r){return r.reporter}).join(', ') %></div>
+        <div class="rank-reasons">
+          <% s.reports.forEach(function(r){ %>
+            <div class="reason">
+              <span>
+                <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px;margin-right:6px;background:<%= (catColors[r.category] || '#64748b') + '20' %>;color:<%= catColors[r.category] || '#64748b' %>"><%= r.category || '其他' %></span>
+                <strong><%= r.reporter %></strong>：<%= r.reason %>
+              </span>
+              <% if (r.evidence && r.evidence.length > 0) { %>
+                <span style="flex-shrink:0">
+                  <% r.evidence.forEach(function(img){ %>
+                    <a href="<%= img %>" target="_blank"><img src="<%= img %>" style="width:40px;height:40px;border-radius:6px;object-fit:cover;border:1px solid var(--b)"></a>
+                  <% }) %>
+                </span>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+        <form method="POST" action="/admin/reports/bulk" class="rank-actions">
+          <input type="hidden" name="type" value="post">
+          <input type="hidden" name="target_id" value="<%= s.target_id %>">
+          <button name="action" value="hide" class="btn btn-sm btn-warning">📝 下架帖子</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <!-- 举报用户 -->
+  <% if (userStats.length > 0) { %>
+  <div class="page-card">
+    <h2>👤 举报用户排名 <span style="font-weight:400;font-size:13px;color:var(--t3)"><%= userStats.length %> 个目标</span></h2>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:12px">≥3次自动禁言+限流 · ≥5次自动封禁</p>
+    <% userStats.forEach(function(s, i){ %>
+      <div class="rank-card <%= s.count >= 5 ? 'danger' : s.count >= 3 ? 'warn' : '' %>">
+        <div class="rank-top">
+          <div class="target">
+            <span style="color:var(--t3)">#<%= i+1 %></span>
+            <a href="/user/<%= encodeURIComponent(s.target_id) %>"><%= s.target_title %></a>
+          </div>
+          <span class="rank-count <%= s.count >= 5 ? 'c5' : s.count >= 3 ? 'c3' : '' %>">🔥 <%= s.count %> 次举报</span>
+        </div>
+        <div class="rank-reporters">举报人：<%= s.reports.map(function(r){return r.reporter}).join(', ') %></div>
+        <div class="rank-reasons">
+          <% s.reports.forEach(function(r){ %>
+            <div class="reason">
+              <span>
+                <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px;margin-right:6px;background:<%= (catColors[r.category] || '#64748b') + '20' %>;color:<%= catColors[r.category] || '#64748b' %>"><%= r.category || '其他' %></span>
+                <strong><%= r.reporter %></strong>：<%= r.reason %>
+              </span>
+              <% if (r.evidence && r.evidence.length > 0) { %>
+                <span style="flex-shrink:0">
+                  <% r.evidence.forEach(function(img){ %>
+                    <a href="<%= img %>" target="_blank"><img src="<%= img %>" style="width:40px;height:40px;border-radius:6px;object-fit:cover;border:1px solid var(--b)"></a>
+                  <% }) %>
+                </span>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+        <form method="POST" action="/admin/reports/bulk" class="rank-actions">
+          <input type="hidden" name="type" value="user">
+          <input type="hidden" name="target_id" value="<%= s.target_id %>">
+          <button name="action" value="mute" class="btn btn-sm btn-warning">🔇 禁言</button>
+          <button name="action" value="limit3" class="btn btn-sm" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e">🚦 限流3条</button>
+          <button name="action" value="ban" class="btn btn-sm" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca" onclick="return confirm('确定封禁该用户？')">🚫 封禁</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+  <% } %>
+<% } %>
+
+<%- include('partials/admin-footer') %>

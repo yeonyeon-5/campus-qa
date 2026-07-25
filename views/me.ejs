@@ -76,7 +76,9 @@
               <span><%= post.reply_count %> 条回复</span>
               <span class="post-card-dot">·</span>
               <span><%= post.created_at %></span>
-              <% if (post.is_hidden) { %><span class="badge badge-no">已隐藏</span><% } %>
+              <% if (post.status === 'pending') { %><span class="badge badge-new">审核中</span><% } %>
+              <% if (post.status === 'rejected') { %><span class="badge badge-no">已驳回</span><% } %>
+              <% if (post.is_hidden && post.status !== 'pending' && post.status !== 'rejected') { %><span class="badge badge-no">已隐藏</span><% } %>
               <form method="POST" action="/me/delete-post/<%= post.id %>" onsubmit="return confirm('确定删除帖子？')" style="margin-left:auto;display:inline">
                 <button type="submit" class="btn btn-sm btn-warning">删除</button>
               </form>

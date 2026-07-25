@@ -1,0 +1,83 @@
+<%- include('partials/header') %>
+
+<style>
+.dboard{background:#0f172a;border-radius:20px;padding:24px 28px;margin-bottom:24px;color:#e2e8f0;box-shadow:0 4px 24px rgba(15,23,42,.15)}
+.dboard h1{color:#f1f5f9;font-size:22px;margin-bottom:2px}
+.dboard .sub{color:#94a3b8;font-size:13px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:18px}
+.s-card{background:rgba(255,255,255,.07);border-radius:14px;padding:14px 16px;text-align:center}
+.s-card .num{font-size:26px;font-weight:900;line-height:1.15}
+.s-card .lbl{font-size:10px;color:#94a3b8;margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+.s-card .c1{color:#f97316}.s-card .c2{color:#6366f1}.s-card .c3{color:#ec4899}.s-card .c4{color:#10b981}.s-card .c5{color:#f59e0b}.s-card .c6{color:#ef4444}
+
+.tab-wrap{background:var(--card);border:1px solid var(--b);border-radius:18px;overflow:hidden;box-shadow:var(--sh);margin-bottom:24px}
+.tab-wrap h2{font-size:16px;font-weight:800;padding:16px 20px;border-bottom:1px solid var(--b)}
+.tab-wrap .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.r-table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+.r-table th,.r-table td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--b);white-space:nowrap}
+.r-table thead th{background:#fafaf9;font-weight:700;font-size:11px;text-transform:uppercase;color:var(--t3)}
+.r-table tbody tr:hover{background:#fefaf7}
+.r-table tbody tr:last-child td{border-bottom:none}
+.r-table td a{color:var(--pd);text-decoration:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:180px}
+.r-num{font-weight:800;font-size:15px}
+.hbar{display:inline-block;height:6px;border-radius:3px;background:linear-gradient(90deg,#f97316,#ec4899);vertical-align:middle;margin-right:6px}
+</style>
+
+<div class="page-header"><h1>📋 管理后台</h1></div>
+
+<div class="admin-nav" style="display:flex;gap:4px;margin-bottom:22px;background:var(--card);border:1px solid var(--b);border-radius:12px;padding:4px">
+  <a href="/admin" style="flex:1;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;color:var(--t2);white-space:nowrap">⏳ 审核帖子</a>
+  <a href="/admin/dashboard" style="flex:1;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;color:var(--pd);white-space:nowrap;background:var(--pl)">🔥 热度排行</a>
+  <a href="/admin/announcements" style="flex:1;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;color:var(--t2);white-space:nowrap">📢 公告管理</a>
+</div>
+
+<div class="dboard">
+  <h1>📊 数据仪表盘</h1>
+  <p class="sub"><%= stats.total %> 条帖子 · 热度 = 赞×1 + 回复×2 + 收藏×3</p>
+  <div class="stats-grid">
+    <div class="s-card"><div class="num c1"><%= stats.total %></div><div class="lbl">帖子总数</div></div>
+    <div class="s-card"><div class="num c2"><%= stats.visible %></div><div class="lbl">已发布</div></div>
+    <div class="s-card"><div class="num c6"><%= stats.pending %></div><div class="lbl">待审核</div></div>
+    <div class="s-card"><div class="num c4"><%= stats.totalReplies %></div><div class="lbl">回复总数</div></div>
+    <div class="s-card"><div class="num c5"><%= stats.totalLikes %></div><div class="lbl">点赞总数</div></div>
+    <div class="s-card"><div class="num c3"><%= stats.totalHeat %></div><div class="lbl">总热度</div></div>
+  </div>
+</div>
+
+<% var maxH = ranked.length > 0 ? Math.max(1, ranked[0].heat) : 1 %>
+<div class="tab-wrap">
+  <h2>🔥 帖子热度排行榜</h2>
+  <div class="scroll">
+  <table class="r-table">
+    <thead><tr><th>#</th><th>标题</th><th>作者</th><th>状态</th><th>👍</th><th>💬</th><th>⭐</th><th>热度</th></tr></thead>
+    <tbody>
+      <% ranked.forEach((post, i) => { %>
+        <%
+          var r = i + 1;
+          var medal = r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : '#' + r;
+          var pct = Math.round(post.heat / maxH * 100);
+          var sl = '可见', sc = 'badge-ok';
+          if (post.status === 'pending') { sl = '审核中'; sc = 'badge-new'; }
+          else if (post.status === 'rejected') { sl = '已驳回'; sc = 'badge-no'; }
+          else if (post.is_hidden) { sl = '已隐藏'; sc = 'badge-no'; }
+        %>
+        <tr class="<%= post.is_hidden && post.status !== 'rejected' ? 'row-hidden' : '' %>">
+          <td><span class="r-num"><%= medal %></span></td>
+          <td><a href="/post/<%= post.id %>"><%= post.title %></a></td>
+          <td><%= post.author %></td>
+          <td><span class="badge <%= sc %>"><%= sl %></span></td>
+          <td><%= post.like_count %></td>
+          <td><%= post.reply_count %></td>
+          <td><%= post.bookmark_count %></td>
+          <td><span class="hbar" style="width:<%= Math.max(8,pct) %>px"></span>🔥 <%= post.heat %></td>
+        </tr>
+      <% }) %>
+      <% if (ranked.length === 0) { %>
+        <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--t3)">暂无帖子</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

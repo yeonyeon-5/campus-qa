@@ -1,0 +1,103 @@
+<%- include('partials/header') %>
+
+<% if (success) { %>
+  <div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= success %></div>
+<% } %>
+
+<!-- 面包屑导航 -->
+<nav class="breadcrumb">
+  <a href="/">首页</a>
+  <span class="breadcrumb-sep">›</span>
+  <a href="/blog">文献</a>
+  <span class="breadcrumb-sep">›</span>
+  <span class="breadcrumb-current"><%= article.title %></span>
+</nav>
+
+<div class="article-detail">
+  <div class="article-detail-header">
+    <span class="tag-badge tag-badge-<%= article.category %>"><%= article.category %></span>
+    <% if (article.status === 'pending') { %>
+      <span class="badge badge-new">审核中</span>
+    <% } else if (article.status === 'rejected') { %>
+      <span class="badge badge-no">已驳回</span>
+    <% } %>
+    <% if (article.tags && article.tags.length > 0) { %>
+      <% article.tags.forEach(function(tag) { %>
+        <span class="tag-badge tag-badge-other"><%= tag %></span>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <h1 class="article-detail-title"><%= article.title %></h1>
+
+  <div class="post-detail-meta">
+    <span style="display:flex;align-items:center;gap:6px">
+      <span class="reply-avatar" style="background:var(--avatar<%= getAvatar(article.author) %>)"><%= article.author[0] %></span>
+      <a href="/user/<%= encodeURIComponent(article.author) %>" style="color:var(--s);font-weight:600;text-decoration:none"><%= article.author %></a>
+    </span>
+    <span>👁 <%= article.views || 0 %> 次阅读</span>
+    <span><%= article.created_at %></span>
+  </div>
+
+  <div class="post-detail-content"><%= article.content %></div>
+
+  <div class="post-actions">
+    <form method="POST" action="/blog/<%= article.id %>/like" style="display:inline">
+      <button type="submit" class="action-btn <%= article.liked ? 'action-btn-active' : '' %>">
+        👍 <%= (article.likes && article.likes.length) || 0 %> 点赞
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- 评论区 -->
+<div class="replies-section">
+  <h2>评论（<%= comments.length %>）</h2>
+
+  <% if (comments.length === 0) { %>
+    <p class="text-muted" style="margin-bottom:20px">还没有评论，来写第一条吧</p>
+  <% } else { %>
+    <div class="reply-list">
+      <% comments.forEach(function(c) { %>
+        <div class="reply-card">
+          <div class="reply-top">
+            <span class="reply-author">
+              <span class="reply-avatar" style="background:var(--avatar<%= getAvatar(c.author) %>)"><%= c.author[0] %></span>
+              <a href="/user/<%= encodeURIComponent(c.author) %>" style="color:var(--s);text-decoration:none"><%= c.author %></a>
+            </span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="reply-time"><%= c.created_at %></span>
+              <form method="POST" action="/blog/comment/<%= c.id %>/like" style="display:inline">
+                <button type="submit" class="action-btn action-btn-sm <%= c.liked ? 'action-btn-active' : '' %>">
+                  👍 <%= (c.likes && c.likes.length) || 0 %>
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="reply-text"><%= c.content %></div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <!-- 评论表单 -->
+  <div class="reply-form-card">
+    <form method="POST" action="/blog/<%= article.id %>/comment">
+      <div class="form-group">
+        <label>发表评论</label>
+        <textarea name="content" class="form-input form-textarea" placeholder="写下你的想法..." rows="3" required></textarea>
+      </div>
+      <% if (error) { %>
+        <p style="color:var(--r);font-size:13px;margin-bottom:12px"><%= error %></p>
+      <% } %>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">发表评论</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+<script>
+(function(){var t=document.getElementById('toast');if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateY(-20px)'},2500)}})();
+</script>

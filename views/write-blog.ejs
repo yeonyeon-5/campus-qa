@@ -1,0 +1,53 @@
+<%- include('partials/header') %>
+
+<div class="page-header">
+  <h1>发表文章</h1>
+  <a href="/blog" class="text-link">← 返回文献</a>
+</div>
+
+<% if (error) { %>
+  <div class="toast toast-error" id="toast"><span class="toast-icon">!</span><%= error %></div>
+<% } %>
+
+<form method="POST" action="/blog" class="form-card">
+  <div class="form-group">
+    <label for="title">文章标题 <span class="req">*</span></label>
+    <input type="text" id="title" name="title" class="form-input" placeholder="给文章取个标题" maxlength="100" required autofocus value="<%= form.title || '' %>">
+  </div>
+
+  <div class="form-group">
+    <label for="summary">摘要</label>
+    <input type="text" id="summary" name="summary" class="form-input" placeholder="一句话概括文章内容（选填）" maxlength="200" value="<%= form.summary || '' %>">
+  </div>
+
+  <div style="display:flex;gap:12px">
+    <div class="form-group" style="flex:1">
+      <label for="category">分类</label>
+      <select id="category" name="category" class="form-input">
+        <option value="论文" <%= form.category === '论文' ? 'selected' : '' %>>论文</option>
+        <option value="笔记" <%= form.category === '笔记' ? 'selected' : '' %>>笔记</option>
+        <option value="教程" <%= form.category === '教程' ? 'selected' : '' %>>教程</option>
+        <option value="资料" <%= form.category === '资料' ? 'selected' : '' %>>资料</option>
+        <option value="其他" <%= form.category === '其他' || !form.category ? 'selected' : '' %>>其他</option>
+      </select>
+    </div>
+    <div class="form-group" style="flex:1">
+      <label for="tags">标签</label>
+      <input type="text" id="tags" name="tags" class="form-input" placeholder="逗号分隔，如：高数, 期末" value="<%= form.tags || '' %>">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="content">文章内容 <span class="req">*</span></label>
+    <textarea id="content" name="content" class="form-input form-textarea" placeholder="支持 Markdown 格式..." rows="12" required><%= form.content || '' %></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary btn-lg">发表文章</button>
+  </div>
+</form>
+
+<%- include('partials/footer') %>
+<script>
+(function(){var t=document.getElementById('toast');if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)'},2500)}})();
+</script>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 - 校园问答</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+  *,*::before,*::after{box-sizing:border-box}
+  .admin-topbar{background:rgba(255,255,255,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.05);position:sticky;top:0;z-index:100}
+  .admin-topbar .inner{display:flex;align-items:center;height:50px;padding:0 20px;gap:12px;max-width:1100px;margin:0 auto}
+  .admin-topbar .brand{font-size:15px;font-weight:800;color:var(--pd);white-space:nowrap;letter-spacing:-.01em}
+  .admin-topbar .nav-links{display:flex;align-items:center;gap:1px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .admin-topbar .nav-links::-webkit-scrollbar{display:none}
+  .admin-topbar .nav-links a{font-size:13px;color:var(--t2);text-decoration:none;padding:5px 12px;border-radius:20px;white-space:nowrap;font-weight:500;transition:all .2s}
+  .admin-topbar .nav-links a:hover{background:var(--pl);color:var(--pd)}
+  .admin-topbar .nav-links a.active{background:var(--pl);color:var(--pd);font-weight:700}
+  .admin-topbar .user-area{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .admin-topbar .user-tag{font-size:12px;color:var(--t3);background:#f5f5f4;padding:3px 10px;border-radius:12px;white-space:nowrap}
+  .admin-topbar .logout-btn{font-size:12px;color:#ef4444;text-decoration:none;padding:4px 10px;border-radius:20px;transition:all .2s;white-space:nowrap}
+  .admin-topbar .logout-btn:hover{background:#fef2f2}
+
+  .admin-main{padding:20px 24px;max-width:1100px;margin:0 auto;width:100%;box-sizing:border-box}
+  .page-card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:18px 22px;box-shadow:var(--sh);margin-bottom:16px;width:100%}
+  .page-card h2{font-size:16px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .data-table{width:100%;border-collapse:collapse;font-size:13px}
+  .data-table th,.data-table td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--b);white-space:nowrap}
+  .data-table thead th{background:#fafaf9;font-weight:700;font-size:11px;color:var(--t3);letter-spacing:.04em}
+  .data-table tbody tr:hover{background:#fefaf7}
+  .data-table tbody tr:last-child td{border-bottom:none}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
+
+  @media(max-width:640px){
+    .admin-topbar .inner{height:auto;flex-wrap:wrap;padding:6px 10px;row-gap:4px}
+    .admin-topbar .brand{font-size:14px}
+    .admin-topbar .nav-links{order:3;width:100%;padding:2px 0}
+    .admin-topbar .nav-links a{font-size:12px;padding:5px 10px}
+    .admin-topbar .user-area{margin-left:auto}
+    .admin-main{padding:10px 12px}
+    .page-card{padding:12px 14px;border-radius:12px}
+    .page-card h2{font-size:15px}
+    .data-table{font-size:12px}
+    .data-table th,.data-table td{padding:6px 8px}
+  }
+  </style>
+</head>
+<body style="background:linear-gradient(170deg,#fff5f0 0%,#fef9f5 40%,#faf5ff 100%);background-attachment:fixed;min-height:100vh">
+
+<header class="admin-topbar">
+  <div class="inner">
+    <span class="brand">⚙️ 管理后台</span>
+    <nav class="nav-links">
+      <a href="/admin/dashboard" class="<%= page === 'dashboard' ? 'active' : '' %>">📊 仪表盘</a>
+      <a href="/admin/review" class="<%= page === 'review' ? 'active' : '' %>">⏳ 审核</a>
+      <a href="/admin/posts" class="<%= page === 'posts' ? 'active' : '' %>">📝 帖子</a>
+      <a href="/admin/users" class="<%= page === 'users' ? 'active' : '' %>">👥 用户</a>
+      <a href="/admin/announcements" class="<%= page === 'announcements' ? 'active' : '' %>">📢 公告</a>
+      <a href="/admin/reports" class="<%= page === 'reports' ? 'active' : '' %>">🚩 举报</a>
+      <a href="/">← 前台</a>
+    </nav>
+    <div class="user-area">
+      <span class="user-tag">👤 admin</span>
+      <a href="/logout" class="logout-btn">退出</a>
+    </div>
+  </div>
+</header>
+
+<div class="admin-main">

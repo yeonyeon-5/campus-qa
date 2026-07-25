@@ -6,13 +6,13 @@
 var suggestTimer=null;
 function handleSearchInput(val){
   var dd=document.getElementById('suggestDropdown');
-  if(val.trim()===''){window.location.href='/';return}
+  if(val.trim()===''){window.location.href='/qa';return}
   clearTimeout(suggestTimer);
   suggestTimer=setTimeout(function(){
     fetch('/api/suggest?q='+encodeURIComponent(val)).then(function(r){return r.json()}).then(function(data){
       if(!data.length){dd.style.display='none';return}
       var html=''; data.forEach(function(item){html+='<a href="/post/'+item.id+'" class="suggest-item">'+escHtml(item.title)+'</a>'});
-      html+='<a href="/?q='+encodeURIComponent(val)+'" class="suggest-item" style="color:var(--p);font-weight:600">🔍 搜索全部「'+escHtml(val)+'」</a>';
+      html+='<a href="/qa?q='+encodeURIComponent(val)+'" class="suggest-item" style="color:var(--p);font-weight:600">🔍 搜索全部「'+escHtml(val)+'」</a>';
       dd.innerHTML=html;dd.style.display='block';
     });
   },200);

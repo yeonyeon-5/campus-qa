@@ -1,0 +1,41 @@
+<%- include('partials/admin-layout', { page: 'review' }) %>
+
+<style>
+.r-card{background:var(--card);border:2px solid #fecaca;border-radius:16px;padding:18px 22px;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.r-info{flex:1;min-width:0}
+.r-info h3{font-size:16px;margin-bottom:4px}
+.r-info h3 a{color:var(--t);text-decoration:none}
+.r-info h3 a:hover{color:var(--pd)}
+.r-meta{font-size:12px;color:var(--t3)}
+.r-content{font-size:13px;color:var(--t2);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.reject-inp{width:100px;padding:5px 10px;font-size:12px;border:1px solid var(--b);border-radius:14px;font-family:inherit;outline:none}
+</style>
+
+<% if (message) { %><div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= message %></div><% } %>
+
+<div class="page-card">
+  <h2>⏳ 待审核帖子 <span style="background:#fef2f2;color:#dc2626;font-size:11px;padding:2px 10px;border-radius:10px"><%= pending.length %></span></h2>
+  <% if (pending.length === 0) { %>
+    <div style="text-align:center;padding:40px;color:var(--t3)">✅ 全部处理完毕</div>
+  <% } else { %>
+    <% pending.forEach(post => { %>
+      <div class="r-card">
+        <div class="r-info">
+          <h3><a href="/post/<%= post.id %>" target="_blank"><%= post.title %></a></h3>
+          <div class="r-meta"><%= post.author %> · <%= post.created_at %></div>
+          <div class="r-content"><%= (post.content || '').slice(0, 120) %><%= (post.content || '').length > 120 ? '...' : '' %></div>
+        </div>
+        <div class="r-actions">
+          <form method="POST" action="/admin/review/<%= post.id %>/approve"><button class="btn btn-success btn-sm">✅ 通过</button></form>
+          <form method="POST" action="/admin/review/<%= post.id %>/reject" style="display:inline-flex;gap:4px" onsubmit="var r=this.querySelector('input');if(!r.value.trim()){r.placeholder='驳回理由';r.focus();return false}">
+            <input type="text" name="reason" class="reject-inp" placeholder="驳回理由">
+            <button class="btn btn-warning btn-sm">❌ 驳回</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+
+<%- include('partials/admin-footer') %>

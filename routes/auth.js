@@ -17,7 +17,11 @@ router.post('/login', (req, res) => {
   if (!username || !password) {
     return res.render('login', { error: '请输入账号和密码', form: { username } });
   }
-  if (db.verifyLogin(username, password)) {
+  const v = db.verifyLogin(username, password);
+  if (v === 'banned') {
+    return res.render('login', { error: '该账号已被封禁，无法登录', form: { username } });
+  }
+  if (v) {
     res.cookie('user', username, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
     return res.redirect('/');
   }

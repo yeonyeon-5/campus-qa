@@ -1,53 +1,65 @@
 <%- include('partials/header') %>
 
+<style>
+.admin-nav{display:flex;gap:4px;margin-bottom:22px;background:var(--card);border:1px solid var(--b);border-radius:12px;padding:4px;overflow-x:auto}
+.admin-nav a{flex:1;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;color:var(--t2);white-space:nowrap;transition:all .2s}
+.admin-nav a.active,.admin-nav a:hover{background:var(--pl);color:var(--pd)}
+.admin-nav a.active{font-weight:700}
+
+.review-card{background:var(--card);border:2px solid #fecaca;border-radius:16px;padding:18px 22px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(239,68,68,.05)}
+.review-card .info{flex:1;min-width:0}
+.review-card .title{font-size:16px;font-weight:700}
+.review-card .title a{color:var(--t);text-decoration:none}
+.review-card .title a:hover{color:var(--pd)}
+.review-card .meta{font-size:12px;color:var(--t3);margin-top:4px}
+.review-card .preview{font-size:13px;color:var(--t2);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.review-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.reject-inp{width:100px;padding:5px 10px;font-size:12px;border:1px solid var(--b);border-radius:14px;font-family:inherit;outline:none}
+.reject-inp:focus{border-color:var(--r)}
+</style>
+
 <div class="page-header">
-  <h1>管理面板</h1>
-  <a href="/" class="text-link">← 返回首页</a>
+  <h1>📋 管理后台</h1>
+</div>
+
+<!-- 子导航 -->
+<div class="admin-nav">
+  <a href="/admin" class="active">⏳ 审核帖子</a>
+  <a href="/admin/dashboard">🔥 热度排行</a>
+  <a href="/admin/announcements">📢 公告管理</a>
 </div>
 
 <% if (message) { %>
-  <div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= message %></div>
+<div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= message %></div>
 <% } %>
 
-<% if (posts.length === 0) { %>
+<% if (pending.length === 0) { %>
   <div class="empty-state">
-    <div class="empty-art">
-      <svg viewBox="0 0 80 50" fill="none" width="80" height="50"><rect x="5" y="5" width="70" height="40" rx="6" stroke="#d6d3d1" stroke-width="1.5" stroke-dasharray="4 3"/><line x1="18" y1="18" x2="62" y2="18" stroke="#e7e5e4" stroke-width="2" stroke-linecap="round"/><line x1="18" y1="26" x2="50" y2="26" stroke="#e7e5e4" stroke-width="2" stroke-linecap="round"/></svg>
-    </div>
-    <p>还没有任何帖子</p>
+    <div class="empty-art" style="font-size:40px">✅</div>
+    <h2>没有待审核的帖子</h2>
+    <p>所有帖子已处理完毕</p>
   </div>
 <% } else { %>
-  <div class="admin-wrap">
-    <table class="admin-table">
-      <thead><tr><th>ID</th><th>标题</th><th>作者</th><th>回复</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
-      <tbody>
-        <% posts.forEach(post => { %>
-          <tr class="<%= post.is_hidden ? 'row-hidden' : '' %>">
-            <td><%= post.id %></td>
-            <td><a href="/post/<%= post.id %>"><%= post.title %></a></td>
-            <td><%= post.author %></td>
-            <td><%= post.reply_count %></td>
-            <td><span class="badge <%= post.is_hidden ? 'badge-no' : 'badge-ok' %>"><%= post.is_hidden ? '已隐藏' : '可见' %></span></td>
-            <td><%= post.created_at %></td>
-            <td>
-              <form method="POST" action="/admin/<%= post.id %>/toggle" style="display:inline">
-                <button type="submit" class="btn btn-sm <%= post.is_hidden ? 'btn-success' : 'btn-warning' %>">
-                  <%= post.is_hidden ? '恢复' : '隐藏' %>
-                </button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
+  <p style="font-size:14px;color:var(--t2);margin-bottom:12px">共 <strong style="color:#dc2626"><%= pending.length %></strong> 条待审核</p>
+  <% pending.forEach(post => { %>
+    <div class="review-card">
+      <div class="info">
+        <div class="title"><a href="/post/<%= post.id %>" target="_blank"><%= post.title %></a></div>
+        <div class="meta"><%= post.author %> · <%= post.created_at %></div>
+        <div class="preview"><%= (post.content || '').slice(0, 100) %><%= (post.content || '').length > 100 ? '...' : '' %></div>
+      </div>
+      <div class="review-actions">
+        <form method="POST" action="/admin/<%= post.id %>/approve"><button class="btn btn-success btn-sm">✅ 通过</button></form>
+        <form method="POST" action="/admin/<%= post.id %>/reject" style="display:inline-flex;gap:4px" onsubmit="var r=this.querySelector('input');if(!r.value.trim()){r.placeholder='驳回理由';r.focus();return false}">
+          <input type="text" name="reason" class="reject-inp" placeholder="驳回理由">
+          <button class="btn btn-warning btn-sm">❌ 驳回</button>
+        </form>
+      </div>
+    </div>
+  <% }) %>
 <% } %>
 
 <%- include('partials/footer') %>
-
 <script>
-(function(){
-  var t=document.getElementById('toast');
-  if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)'},2500)}
-})();
+(function(){var t=document.getElementById('toast');if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)'},2500)}})();
 </script>

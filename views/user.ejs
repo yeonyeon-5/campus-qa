@@ -16,7 +16,10 @@
     </div>
   </div>
   <a href="/messages?tab=chats&chat=<%= encodeURIComponent(name) %>" class="btn btn-primary btn-sm" style="margin-left:auto">💬 私聊</a>
+  <a href="/report/user/<%= encodeURIComponent(name) %>" class="btn btn-sm btn-warning" style="color:#dc2626">🚩 举报</a>
 </div>
+
+<% if (typeof success !== 'undefined' && success) { %><div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= success %></div><% } %>
 
 <% if (posts.length === 0) { %>
   <div class="empty-state" style="padding:40px">

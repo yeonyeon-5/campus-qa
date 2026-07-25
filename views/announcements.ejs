@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+
+<style>
+.ann-nav{display:flex;gap:4px;margin-bottom:22px;background:var(--card);border:1px solid var(--b);border-radius:12px;padding:4px;overflow-x:auto}
+.ann-nav a{flex:1;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;color:var(--t2);white-space:nowrap;transition:all .2s}
+.ann-nav a.active,.ann-nav a:hover{background:var(--pl);color:var(--pd)}
+.ann-nav a.active{font-weight:700}
+
+.ann-form{background:var(--card);border:1px solid var(--b);border-radius:18px;padding:22px 24px;margin-bottom:24px;box-shadow:var(--sh)}
+.ann-list{display:flex;flex-direction:column;gap:10px}
+.ann-card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:16px 20px;box-shadow:var(--sh);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ann-card .body{flex:1;min-width:0}
+.ann-card .body h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.ann-card .body p{font-size:13px;color:var(--t2);line-height:1.6;white-space:pre-wrap}
+.ann-card .body .time{font-size:11px;color:var(--t3);margin-top:6px}
+.ann-card .del-btn{flex-shrink:0}
+</style>
+
+<div class="page-header"><h1>📋 管理后台</h1></div>
+
+<div class="ann-nav">
+  <a href="/admin">⏳ 审核帖子</a>
+  <a href="/admin/dashboard">🔥 热度排行</a>
+  <a href="/admin/announcements" class="active">📢 公告管理</a>
+</div>
+
+<% if (message) { %>
+<div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= message %></div>
+<% } %>
+<% if (error) { %>
+<div class="toast toast-error" id="toast"><span class="toast-icon">!</span><%= error %></div>
+<% } %>
+
+<!-- 发布公告 -->
+<div class="ann-form">
+  <h2 style="font-size:16px;font-weight:800;margin-bottom:14px">📢 发布新公告</h2>
+  <form method="POST" action="/admin/announcements/create">
+    <div class="form-group">
+      <label for="title">公告标题 <span class="req">*</span></label>
+      <input type="text" id="title" name="title" class="form-input" placeholder="例如：校园问答正式上线啦" required maxlength="100">
+    </div>
+    <div class="form-group">
+      <label for="content">公告内容 <span class="req">*</span></label>
+      <textarea id="content" name="content" class="form-input form-textarea" placeholder="支持换行，纯文本..." rows="3" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">发布公告</button>
+  </form>
+</div>
+
+<!-- 公告列表 -->
+<h2 style="font-size:16px;font-weight:800;margin-bottom:12px">已发布公告（<%= announcements.length %>）</h2>
+
+<% if (announcements.length === 0) { %>
+  <div class="empty-state" style="padding:32px"><p style="color:var(--t3)">还没有发布过公告</p></div>
+<% } else { %>
+  <div class="ann-list">
+    <% announcements.forEach(a => { %>
+      <div class="ann-card">
+        <div class="body">
+          <h3>📌 <%= a.title %></h3>
+          <p><%= a.content %></p>
+          <div class="time"><%= a.created_at %></div>
+        </div>
+        <form method="POST" action="/admin/announcements/<%= a.id %>/delete" onsubmit="return confirm('确定删除这条公告？')" class="del-btn">
+          <button type="submit" class="btn btn-warning btn-sm">删除</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>
+<script>
+(function(){var t=document.getElementById('toast');if(t){setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)'},2500)}})();
+</script>

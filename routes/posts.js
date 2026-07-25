@@ -23,13 +23,31 @@ const upload = multer({
   }
 });
 
-// 首页 - 帖子列表
+// 主页面 - 问答 + 博客入口 Hub
 router.get('/', (req, res) => {
+  const allPosts = db.getVisiblePosts();
+  const allArticles = db.getVisibleArticles(null);
+  const qaCount = allPosts.length;
+  const blogCount = allArticles.length;
+  const userCount = db.getAllUsers().length;
+  // 最新 3 条帖子和文章预览
+  const recentPosts = allPosts.slice(0, 3);
+  const recentArticles = allArticles.slice(0, 3);
+  res.render('home', {
+    qaCount, blogCount, userCount,
+    recentPosts, recentArticles,
+    currentUser: req.cookies ? req.cookies.user : null
+  });
+});
+
+// Q&A 首页
+router.get('/qa', (req, res) => {
   const q = (req.query.q || '').trim();
   const posts = q ? db.searchPosts(q) : db.getVisiblePosts();
+  const announcements = db.getAnnouncements();
   const success = req.query.success;
   const error = req.query.error;
-  res.render('index', { posts, success, error, query: q });
+  res.render('index', { posts, announcements, success, error, query: q });
 });
 
 // 搜索建议 API
@@ -65,8 +83,14 @@ router.post('/post', (req, res) => {
   if (author.startsWith('游客_')) {
     return res.send('<script>alert("本社区实行实名制，游客不能发帖。请退出后以实名登录。");history.back()</script>');
   }
+  if (db.isUserMuted(author)) {
+    return res.send('<script>alert("你已被禁言，无法发帖。如有疑问请联系管理员。");history.back()</script>');
+  }
+  if (db.getUserRateLimit(author) > 0 && db.getTodayActivityCount(author) >= db.getUserRateLimit(author)) {
+    return res.send('<script>alert("你今日发帖已达上限（' + db.getUserRateLimit(author) + '条/天），请明天再试。");history.back()</script>');
+  }
   db.createPost(trimmedTitle, trimmedContent, author);
-  res.redirect('/?success=发帖成功');
+  res.redirect('/?success=帖子已提交，等待管理员审核后公开');
 });
 
 // 帖子详情页
@@ -76,6 +100,10 @@ router.get('/post/:id', (req, res) => {
     return res.status(404).render('404', { message: '帖子不存在或已被删除' });
   }
   const who = res.locals.currentUser;
+  // 审核中/已驳回的帖子，仅作者本人可见
+  if (post.is_hidden && post.author !== who) {
+    return res.status(404).render('404', { message: '帖子不存在或审核中' });
+  }
   const replies = db.getRepliesByPostId(req.params.id);
   const isBookmarked = db.isBookmarked(who, req.params.id);
   const bookmarkCount = db.getBookmarkCount(req.params.id);
@@ -106,6 +134,12 @@ router.post('/post/:id/reply', (req, res) => {
   const author = res.locals.currentUser;
   if (author.startsWith('游客_')) {
     return res.send('<script>alert("本社区实行实名制，游客不能回复。请退出后以实名登录。");history.back()</script>');
+  }
+  if (db.isUserMuted(author)) {
+    return res.send('<script>alert("你已被禁言，无法回复。如有疑问请联系管理员。");history.back()</script>');
+  }
+  if (db.getUserRateLimit(author) > 0 && db.getTodayActivityCount(author) >= db.getUserRateLimit(author)) {
+    return res.send('<script>alert("你今日发帖已达上限（' + db.getUserRateLimit(author) + '条/天），请明天再试。");history.back()</script>');
   }
   const { content } = req.body;
   const trimmedContent = (content || '').trim();
@@ -173,13 +207,23 @@ router.post('/me/delete-reply/:id', (req, res) => {
   res.redirect('/me?tab=replies&' + (ok ? 'success=回复已删除' : 'error=删除失败'));
 });
 
+// 公告列表（用户端）
+router.get('/announcements', (req, res) => {
+  const q = (req.query.q || '').trim();
+  let announcements = db.getAnnouncements();
+  if (q) {
+    announcements = announcements.filter(a => a.title.includes(q) || a.content.includes(q));
+  }
+  res.render('announcements-list', { announcements, query: q });
+});
+
 // 用户主页
 router.get('/user/:name', (req, res) => {
   const name = req.params.name;
   const posts = db.getPostsByAuthor(name);
   const replyCount = db.getRepliesByAuthor(name).length;
   const info = db.getUserInfo(name);
-  res.render('user', { name, posts, replyCount, info });
+  res.render('user', { name, posts, replyCount, info, success: req.query.success || null });
 });
 
 // 更换头像颜色
@@ -197,6 +241,60 @@ router.post('/me/avatar-upload', upload.single('avatar'), (req, res) => {
   const url = '/avatars/' + req.file.filename;
   db.setAvatarUrl(who, url);
   res.redirect('/me?success=头像已更新');
+});
+
+// 上传证据
+const evidenceDir = path.join(__dirname, '..', 'public', 'evidence');
+if (!fs.existsSync(evidenceDir)) fs.mkdirSync(evidenceDir, { recursive: true });
+const evidenceUpload = multer({
+  storage: multer.diskStorage({
+    destination: evidenceDir,
+    filename: function(req, file, cb) {
+      const ext = path.extname(file.originalname);
+      cb(null, 'ev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6) + ext);
+    }
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: function(req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (['.jpg','.jpeg','.png','.gif','.webp'].includes(ext)) { cb(null, true); }
+    else { cb(new Error('仅支持图片格式')); }
+  }
+});
+
+// 举报帖子
+router.get('/report/post/:id', (req, res) => {
+  const post = db.getPostById(req.params.id);
+  if (!post) return res.status(404).render('404', { message: '帖子不存在' });
+  res.render('report', { type: 'post', target: post, error: null });
+});
+
+router.post('/report/post/:id', evidenceUpload.array('evidence', 5), (req, res) => {
+  const post = db.getPostById(req.params.id);
+  if (!post) return res.status(404).render('404', { message: '帖子不存在' });
+  const category = (req.body.category || '').trim();
+  const reason = (req.body.reason || '').trim();
+  if (!category) return res.render('report', { type: 'post', target: post, error: '请选择举报类别' });
+  if (!reason) return res.render('report', { type: 'post', target: post, error: '请填写举报理由' });
+  const files = (req.files || []).map(f => '/evidence/' + f.filename);
+  db.createReport('post', post.id, post.title, category, reason, files, res.locals.currentUser);
+  res.redirect('/post/' + post.id + '?success=举报已提交，管理员会尽快处理');
+});
+
+// 举报用户
+router.get('/report/user/:name', (req, res) => {
+  res.render('report', { type: 'user', target: { author: req.params.name }, error: null });
+});
+
+router.post('/report/user/:name', evidenceUpload.array('evidence', 5), (req, res) => {
+  const name = req.params.name;
+  const category = (req.body.category || '').trim();
+  const reason = (req.body.reason || '').trim();
+  if (!category) return res.render('report', { type: 'user', target: { author: name }, error: '请选择举报类别' });
+  if (!reason) return res.render('report', { type: 'user', target: { author: name }, error: '请填写举报理由' });
+  const files = (req.files || []).map(f => '/evidence/' + f.filename);
+  db.createReport('user', name, name, category, reason, files, res.locals.currentUser);
+  res.redirect('/user/' + encodeURIComponent(name) + '?success=举报已提交');
 });
 
 module.exports = router;

@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+
+<div class="page-header">
+  <h1>📢 公告</h1>
+  <a href="/" class="text-link">← 返回首页</a>
+</div>
+
+<form action="/announcements" method="GET" style="margin-bottom:18px;display:flex;gap:8px">
+  <input type="text" name="q" class="form-input" placeholder="搜索公告..." value="<%= typeof query !== 'undefined' ? query : '' %>" style="flex:1;border-radius:24px">
+  <button type="submit" class="btn btn-primary">搜索</button>
+  <% if (query) { %><a href="/announcements" class="btn btn-ghost">清除</a><% } %>
+</form>
+
+<% if (query) { %>
+  <p style="font-size:13px;color:var(--t3);margin-bottom:14px">搜索「<%= query %>」找到 <%= announcements.length %> 条公告</p>
+<% } %>
+
+<% if (announcements.length === 0) { %>
+  <div class="empty-state">
+    <div class="empty-art" style="font-size:40px">📢</div>
+    <h2>暂无公告</h2>
+    <p>管理员还没有发布任何公告</p>
+  </div>
+<% } else { %>
+  <% announcements.forEach(function(a){ %>
+    <div style="background:var(--card);border:1px solid var(--b);border-radius:16px;padding:20px 24px;margin-bottom:12px;box-shadow:var(--sh)">
+      <h3 style="font-size:17px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        <span>📌</span><%= a.title %>
+      </h3>
+      <div style="font-size:14px;color:var(--t2);line-height:1.8;white-space:pre-wrap"><%= a.content %></div>
+      <div style="font-size:12px;color:var(--t3);margin-top:10px;display:flex;gap:14px">
+        <span>发布者：<strong><%= a.author %></strong></span>
+        <span><%= a.created_at %></span>
+      </div>
+    </div>
+  <% }) %>
+<% } %>
+
+<%- include('partials/footer') %>

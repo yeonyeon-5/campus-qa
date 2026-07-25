@@ -1,0 +1,65 @@
+<%- include('partials/admin-layout', { page: 'users' }) %>
+
+<% if (message) { %><div class="toast toast-success" id="toast"><span class="toast-icon">✓</span><%= message %></div><% } %>
+
+<div class="page-card">
+  <h2>👥 用户管理 <span style="font-weight:400;font-size:13px;color:var(--t3)"><%= users.length %> 人</span></h2>
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead><tr><th>用户名</th><th>姓名</th><th>帖子</th><th>回复</th><th>日限</th><th>状态</th><th>禁言/封禁</th><th>限流设置</th></tr></thead>
+    <tbody>
+      <% users.forEach(u => { %>
+        <%
+          var badges = [];
+          if (u.banned) badges.push('<span class="badge badge-no">已封禁</span>');
+          else if (u.muted) badges.push('<span class="badge badge-new">已禁言</span>');
+          else badges.push('<span class="badge badge-ok">正常</span>');
+          if (u.username === 'admin') badges = ['<span class="badge badge-ok">管理员</span>'];
+        %>
+        <tr style="<%= u.banned ? 'opacity:.5' : '' %>">
+          <td><strong><%= u.username %></strong></td>
+          <td><%= u.realname || '-' %></td>
+          <td><%= u.postCount %></td>
+          <td><%= u.replyCount %></td>
+          <td>
+            <% if (u.dailyLimit > 0) { %>
+              <span class="badge badge-new"><%= u.dailyLimit %>条/天</span>
+            <% } else { %>
+              <span style="color:var(--t3);font-size:12px">无限制</span>
+            <% } %>
+          </td>
+          <td><%- badges.join(' ') %></td>
+          <td style="display:flex;gap:4px">
+            <% if (u.username !== 'admin') { %>
+              <form method="POST" action="/admin/users/<%= u.username %>/mute">
+                <button class="btn btn-sm <%= u.muted ? 'btn-success' : 'btn-warning' %>"><%= u.muted ? '解禁' : '禁言' %></button>
+              </form>
+              <form method="POST" action="/admin/users/<%= u.username %>/ban" onsubmit="return confirm('<%= u.banned ? '解封' : '封禁' %>用户 <%= u.username %>？')">
+                <button class="btn btn-sm" style="<%= u.banned ? 'background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0' : 'background:#fef2f2;color:#dc2626;border:1px solid #fecaca' %>"><%= u.banned ? '解封' : '封禁' %></button>
+              </form>
+            <% } else { %>
+              <span style="font-size:12px;color:var(--t3)">受保护</span>
+            <% } %>
+          </td>
+          <td>
+            <% if (u.username !== 'admin') { %>
+              <form method="POST" action="/admin/users/<%= u.username %>/ratelimit" style="display:inline-flex;gap:4px;align-items:center">
+                <select name="limit" style="padding:4px 8px;font-size:12px;border:1px solid var(--b);border-radius:8px;font-family:inherit">
+                  <option value="0" <%= u.dailyLimit === 0 ? 'selected' : '' %>>不限</option>
+                  <option value="1" <%= u.dailyLimit === 1 ? 'selected' : '' %>>1条/天</option>
+                  <option value="3" <%= u.dailyLimit === 3 ? 'selected' : '' %>>3条/天</option>
+                  <option value="5" <%= u.dailyLimit === 5 ? 'selected' : '' %>>5条/天</option>
+                  <option value="10" <%= u.dailyLimit === 10 ? 'selected' : '' %>>10条/天</option>
+                </select>
+                <button class="btn btn-sm" style="background:#f8fafc;border:1px solid var(--b);color:var(--t2)">设置</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<%- include('partials/admin-footer') %>
