@@ -57,6 +57,7 @@
     </a>
     <div class="m-links">
       <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+        <a href="/" class="<%= typeof currentPath !== 'undefined' && currentPath === '/' ? 'cur' : '' %>">首页</a>
         <a href="/qa">问答</a>
         <a href="/blog">博客</a>
         <a href="/messages" class="<%= typeof currentPath !== 'undefined' && currentPath === '/messages' ? 'cur' : '' %>">消息</a>

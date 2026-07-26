@@ -1,0 +1,18 @@
+<nav class="navbar" style="border-bottom:1px solid #e8e6f0;background:rgba(255,255,255,.9);height:40px">
+  <div class="container" style="display:flex;align-items:center;height:40px;gap:4px;padding:0 24px;max-width:960px">
+    <a href="/" class="nav-link" style="font-size:12px;padding:4px 12px;font-weight:600">首页</a>
+    <span style="color:#d8d5ce;font-size:12px">|</span>
+    <a href="/qa" class="nav-link" style="font-size:12px;padding:4px 12px">问答</a>
+    <a href="/blog" class="nav-link" style="font-size:12px;padding:4px 12px">博客</a>
+    <a href="/messages" class="nav-link" style="font-size:12px;padding:4px 12px">消息</a>
+    <a href="/announcements" class="nav-link" style="font-size:12px;padding:4px 12px">公告</a>
+    <a href="/me" class="nav-link" style="font-size:12px;padding:4px 12px">我的</a>
+    <span style="flex:1"></span>
+    <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+      <span style="font-size:11px;color:#a8a29e"><%= currentUser %></span>
+      <a href="/logout" style="font-size:11px;color:#ef4444;text-decoration:none;margin-left:10px">退出</a>
+    <% } else { %>
+      <a href="/login" style="font-size:11px;color:#706f6c;text-decoration:none;margin-left:10px">登录</a>
+    <% } %>
+  </div>
+</nav>
