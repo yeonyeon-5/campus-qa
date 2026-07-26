@@ -21,7 +21,6 @@
       <div class="nav-links">
         <a href="/" class="nav-link">首页</a>
         <a href="/blog" class="nav-link active">博客</a>
-        <a href="/blog/messages" class="nav-link">消息</a>
         <a href="/blog/new" class="nav-link" style="background:var(--s);color:#fff;border-radius:20px;padding:6px 16px;font-weight:700">写文章</a>
         <% if (typeof currentUser !== 'undefined' && currentUser === 'admin') { %><a href="/admin" class="nav-link" style="color:#dc2626;font-weight:700">管理</a><% } %>
         <span class="nav-user"><%= typeof currentUser !== 'undefined' ? currentUser : '' %></span>
