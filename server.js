@@ -48,6 +48,7 @@ app.use('/', postsRouter);
 app.use('/', blogRouter);
 app.use('/admin', adminRouter);
 app.use('/messages', messagesRouter);
+app.use('/blog/messages', messagesRouter);
 
 // 404
 app.use((req, res) => {

@@ -1,8 +1,9 @@
-<%- include('partials/header') %>
+<% const isBlog = typeof currentPath !== 'undefined' && currentPath.startsWith('/blog'); const base = isBlog ? '/blog/messages' : '/messages'; %>
+<%- include(isBlog ? 'partials/blog-header' : 'partials/header') %>
 
 <div class="page-header">
   <h1>消息中心</h1>
-  <a href="/" class="text-link">← 返回首页</a>
+  <a href="<%= isBlog ? '/blog' : '/' %>" class="text-link">← 返回<%= isBlog ? '博客' : '首页' %></a>
 </div>
 
 <% if (success) { %>
@@ -13,8 +14,8 @@
 <% } %>
 
 <div class="tabs">
-  <a href="/messages?tab=notifications" class="tab <%= tab === 'notifications' ? 'active' : '' %>">📬 回复通知 <span class="badge badge-new" style="margin-left:6px"><%= notifications.length %></span></a>
-  <a href="/messages?tab=chats" class="tab <%= tab === 'chats' ? 'active' : '' %>">💬 私聊</a>
+  <a href="<%= base %>?tab=notifications" class="tab <%= tab === 'notifications' ? 'active' : '' %>">📬 回复通知 <span class="badge badge-new" style="margin-left:6px"><%= notifications.length %></span></a>
+  <a href="<%= base %>?tab=chats" class="tab <%= tab === 'chats' ? 'active' : '' %>">💬 私聊</a>
 </div>
 
 <% if (tab === 'notifications') { %>
@@ -39,7 +40,7 @@
   <% if (chatWith) { %>
     <!-- 私聊对话 -->
     <div style="margin-bottom:14px">
-      <a href="/messages?tab=chats" class="text-link">← 返回聊天列表</a>
+      <a href="<%= base %>?tab=chats" class="text-link">← 返回聊天列表</a>
     </div>
     <div class="chat-header">
       <a href="/user/<%= encodeURIComponent(chatWith) %>" style="text-decoration:none"><span class="msg-avatar" style="width:36px;height:36px;border-radius:10px;background:var(--avatar<%= getAvatar(chatWith) %>)"><%= chatWith[0] %></span></a>
@@ -58,7 +59,7 @@
         <% }) %>
       <% } %>
     </div>
-    <form method="POST" action="/messages/send" class="chat-form">
+    <form method="POST" action="<%= base %>/send" class="chat-form">
       <input type="hidden" name="to" value="<%= chatWith %>">
       <input type="text" name="content" class="form-input" placeholder="输入消息..." required autofocus style="border-radius:24px">
       <button type="submit" class="btn btn-primary">发送</button>
@@ -73,7 +74,7 @@
     <% } else { %>
       <div class="msg-list">
         <% chatList.forEach(c => { %>
-          <a href="/messages?tab=chats&chat=<%= encodeURIComponent(c.name) %>" class="msg-card">
+          <a href="<%= base %>?tab=chats&chat=<%= encodeURIComponent(c.name) %>" class="msg-card">
             <a href="/user/<%= encodeURIComponent(c.name) %>" style="text-decoration:none" onclick="event.stopPropagation()"><span class="msg-avatar" style="background:var(--avatar<%= getAvatar(c.name) %>)"><%= c.name[0] %></span></a>
             <div class="msg-body">
               <div class="msg-from"><%= c.name %></div>
@@ -88,7 +89,7 @@
     <!-- 发起新聊天 -->
     <div style="margin-top:24px;background:var(--card);border:1px solid var(--b);border-radius:18px;padding:18px 20px;box-shadow:var(--sh)">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:10px">发起新私聊</h3>
-      <form method="GET" action="/messages" class="chat-form">
+      <form method="GET" action="<%= base %>" class="chat-form">
         <input type="hidden" name="tab" value="chats">
         <input type="text" name="chat" class="form-input" placeholder="输入对方的昵称" required style="border-radius:20px">
         <button type="submit" class="btn btn-primary btn-sm">开始聊天</button>
@@ -98,7 +99,7 @@
   <% } %>
 <% } %>
 
-<%- include('partials/footer') %>
+<%- include(isBlog ? 'partials/blog-footer' : 'partials/footer') %>
 
 <script>
 (function(){
