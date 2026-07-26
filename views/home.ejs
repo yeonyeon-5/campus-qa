@@ -23,14 +23,16 @@
       height: 56px; padding: 0 40px;
       background: rgba(250,250,248,.8);
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      flex-wrap: nowrap; overflow-x: auto;
     }
     .nav-brand {
       display: flex; align-items: center; gap: 10px;
       font-size: 18px; font-weight: 800; color: #1a1a1a;
       text-decoration: none; letter-spacing: -.02em;
+      flex-shrink: 0;
     }
     .nav-brand svg { width: 28px; height: 28px; color: #f97316; }
-    .nav-links { display: flex; align-items: center; gap: 2px; }
+    .nav-links { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
     .nav-links a {
       font-size: 13px; color: #706f6c; text-decoration: none;
       padding: 6px 15px; border-radius: 8px; font-weight: 500;
@@ -128,7 +130,11 @@
       .main { padding: 48px 20px; }
       .main h1 { font-size: 34px; }
       .main .sub { font-size: 15px; margin-bottom: 40px; }
-      .nav { padding: 0 20px; }
+      .nav { padding: 0 14px; height: 52px; flex-wrap: nowrap; overflow-x: auto; }
+      .nav-brand { font-size: 15px; gap: 6px; }
+      .nav-brand svg { width: 22px; height: 22px; }
+      .nav-links a { font-size: 11px; padding: 5px 10px; }
+      .nav-user { font-size: 10px; max-width: 60px; }
       .stats { gap: 32px; margin-bottom: 40px; }
       .stat-num { font-size: 26px; }
     }
