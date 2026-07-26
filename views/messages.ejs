@@ -16,32 +16,40 @@
 
 <div class="tabs">
   <% if (!_blog) { %>
-    <a href="<%= base %>?tab=notifications" class="tab <%= tab === 'notifications' ? 'active' : '' %>">📬 互动通知 <span class="badge badge-new" style="margin-left:6px"><%= notifications.length + articleNotifications.length %></span></a>
+    <a href="<%= base %>?tab=notifications" class="tab <%= tab === 'notifications' ? 'active' : '' %>">📬 问答 <span class="badge badge-new" style="margin-left:6px"><%= notifications.length %></span></a>
+    <a href="<%= base %>?tab=blog_notifications" class="tab <%= tab === 'blog_notifications' ? 'active' : '' %>">📝 博客 <span class="badge badge-new" style="margin-left:6px"><%= articleNotifications.length %></span></a>
   <% } %>
   <a href="<%= base %>?tab=chats" class="tab <%= tab === 'chats' || _blog ? 'active' : '' %>">💬 私聊</a>
 </div>
 
 <% if (tab === 'notifications') { %>
-  <% if (notifications.length === 0 && articleNotifications.length === 0) { %>
-    <div class="msg-empty">还没有人回复你的帖子或评论你的文章</div>
+  <% if (notifications.length === 0) { %>
+    <div class="msg-empty">还没有人回复你的帖子</div>
   <% } else { %>
     <div class="msg-list">
       <% notifications.forEach(n => { %>
         <a href="/post/<%= n.post_id %>" class="msg-card">
           <a href="/user/<%= encodeURIComponent(n.author) %>" style="text-decoration:none" onclick="event.stopPropagation()"><span class="msg-avatar" style="background:var(--avatar<%= getAvatar(n.author) %>)"><%= n.author[0] %></span></a>
           <div class="msg-body">
-            <div class="msg-from"><%= n.author %> <span style="font-size:10px;color:var(--p);background:var(--pl);padding:1px 6px;border-radius:4px">问答</span></div>
+            <div class="msg-from"><%= n.author %> 回复了你的帖子</div>
             <div class="msg-preview"><%= n.content %></div>
             <div class="msg-related">帖子：<%= n.post_title %></div>
           </div>
           <span class="msg-time"><%= n.created_at %></span>
         </a>
       <% }) %>
+    </div>
+  <% } %>
+<% } else if (tab === 'blog_notifications') { %>
+  <% if (articleNotifications.length === 0) { %>
+    <div class="msg-empty">还没有人评论你的文章</div>
+  <% } else { %>
+    <div class="msg-list">
       <% articleNotifications.forEach(n => { %>
         <a href="/blog/<%= n.article_id %>" class="msg-card">
           <a href="/user/<%= encodeURIComponent(n.author) %>" style="text-decoration:none" onclick="event.stopPropagation()"><span class="msg-avatar" style="background:var(--avatar<%= getAvatar(n.author) %>)"><%= n.author[0] %></span></a>
           <div class="msg-body">
-            <div class="msg-from"><%= n.author %> <span style="font-size:10px;color:var(--s);background:var(--sl);padding:1px 6px;border-radius:4px">博客</span></div>
+            <div class="msg-from"><%= n.author %> 评论了你的文章</div>
             <div class="msg-preview"><%= n.content %></div>
             <div class="msg-related">文章：<%= n.article_title %></div>
           </div>
