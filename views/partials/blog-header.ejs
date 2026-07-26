@@ -9,6 +9,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div style="background:#fafaf8;border-bottom:1px solid #eeede8;height:36px;display:flex;align-items:center;padding:0 24px">
+    <div style="max-width:960px;margin:0 auto;width:100%;display:flex;align-items:center;gap:16px;font-size:12px">
+      <a href="/" style="color:#706f6c;text-decoration:none;font-weight:600">首页</a>
+      <a href="/qa" style="color:#706f6c;text-decoration:none">问答</a>
+      <a href="/blog" style="color:#706f6c;text-decoration:none">博客</a>
+      <a href="/messages" style="color:#706f6c;text-decoration:none">消息</a>
+      <a href="/announcements" style="color:#706f6c;text-decoration:none">公告</a>
+      <a href="/me" style="color:#706f6c;text-decoration:none">我的</a>
+      <span style="flex:1"></span>
+      <span style="color:#a8a29e;font-size:11px"><%= typeof currentUser !== 'undefined' ? currentUser : '' %></span>
+      <a href="/logout" style="color:#ef4444;text-decoration:none;font-size:11px">退出</a>
+    </div>
+  </div>
   <nav class="navbar">
     <div class="container nav-inner">
       <a href="/" class="nav-brand">
