@@ -88,16 +88,6 @@
       </div>
     <% } %>
 
-    <!-- 发起新聊天 -->
-    <div style="margin-top:24px;background:var(--card);border:1px solid var(--b);border-radius:18px;padding:18px 20px;box-shadow:var(--sh)">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:10px">发起新私聊</h3>
-      <form method="GET" action="<%= base %>" class="chat-form">
-        <input type="hidden" name="tab" value="chats">
-        <input type="text" name="chat" class="form-input" placeholder="输入对方的昵称" required style="border-radius:20px">
-        <button type="submit" class="btn btn-primary btn-sm">开始聊天</button>
-      </form>
-      <p style="font-size:11px;color:var(--t3);margin-top:6px">输入对方昵称后即可开始私聊</p>
-    </div>
   <% } %>
 <% } %>
 
