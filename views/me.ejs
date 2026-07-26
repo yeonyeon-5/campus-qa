@@ -30,6 +30,7 @@
     </div>
     <div style="color:var(--t3);font-size:12px;margin-top:2px">
       ❤️ <%= stats.totalPostLikes + stats.totalArticleLikes %> 赞 · 👁 <%= stats.totalArticleViews %> 阅读
+      · <span>👥 <%= followerCount %> 粉丝 · <%= followingCount %> 关注</span>
     </div>
   </div>
 </div>
@@ -61,6 +62,7 @@
   <a href="/me?tab=articles" class="tab <%= tab === 'articles' ? 'active' : '' %>">📄 文章</a>
   <a href="/me?tab=replies" class="tab <%= tab === 'replies' ? 'active' : '' %>">💬 评论</a>
   <a href="/me?tab=bookmarks" class="tab <%= tab === 'bookmarks' ? 'active' : '' %>">⭐ 收藏</a>
+  <a href="/me?tab=following" class="tab <%= tab === 'following' ? 'active' : '' %>">👥 关注</a>
 </div>
 
 <% if (tab === 'posts') { %>
@@ -187,6 +189,28 @@
             </div>
           </div>
         </a>
+      <% }) %>
+    </div>
+  <% } %>
+<% } else if (tab === 'following') { %>
+  <% if (following.length === 0) { %>
+    <div class="empty-state" style="padding:40px">
+      <p style="color:var(--t3)">还没有关注任何人</p>
+      <p style="font-size:12px;color:var(--t3)">在用户主页或帖子页面点击关注即可</p>
+    </div>
+  <% } else { %>
+    <div class="msg-list">
+      <% following.forEach(f => { %>
+        <div class="msg-card">
+          <a href="/user/<%= encodeURIComponent(f.username) %>" style="text-decoration:none" onclick="event.stopPropagation()"><span class="msg-avatar" style="background:var(--avatar<%= f.username.length % 5 %>)"><%= f.username[0] %></span></a>
+          <div class="msg-body">
+            <div class="msg-from"><%= f.realname || f.username %></div>
+            <div class="msg-preview">@<%= f.username %></div>
+          </div>
+          <form method="POST" action="/follow/<%= encodeURIComponent(f.username) %>" style="display:inline" onclick="event.stopPropagation()">
+            <button class="btn btn-sm btn-ghost" style="color:#ef4444">取消关注</button>
+          </form>
+        </div>
       <% }) %>
     </div>
   <% } %>

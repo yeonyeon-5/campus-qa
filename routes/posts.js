@@ -183,6 +183,9 @@ router.get('/me', (req, res) => {
   const bookmarkedPosts = db.getBookmarkedPosts(who);
   const notifications = db.getNotifications(who);
   const articleNotifications = db.getArticleCommentNotifications(who);
+  const following = db.getFollowing(who);
+  const followerCount = db.getFollowerCount(who);
+  const followingCount = db.getFollowingCount(who);
   // 给每个帖子附加点赞数和收藏数
   const postsWithStats = authorPosts.map(p => ({
     ...p,
@@ -204,6 +207,9 @@ router.get('/me', (req, res) => {
     bookmarks: bookmarkedPosts,
     notifications,
     articleNotifications,
+    following,
+    followerCount,
+    followingCount,
     stats: {
       postCount: authorPosts.length,
       articleCount: authorArticles.length,
@@ -246,10 +252,14 @@ router.get('/announcements', (req, res) => {
 // 用户主页
 router.get('/user/:name', (req, res) => {
   const name = req.params.name;
+  const who = res.locals.currentUser;
   const posts = db.getPostsByAuthor(name);
   const replyCount = db.getRepliesByAuthor(name).length;
   const info = db.getUserInfo(name);
-  res.render('user', { name, posts, replyCount, info, success: req.query.success || null });
+  const isFollowing = who && who !== name ? db.isFollowing(who, name) : false;
+  const followerCount = db.getFollowerCount(name);
+  const followingCount = db.getFollowingCount(name);
+  res.render('user', { name, posts, replyCount, info, isFollowing, followerCount, followingCount, success: req.query.success || null });
 });
 
 // 更换头像颜色
@@ -321,6 +331,15 @@ router.post('/report/user/:name', evidenceUpload.array('evidence', 5), (req, res
   const files = (req.files || []).map(f => '/evidence/' + f.filename);
   db.createReport('user', name, name, category, reason, files, res.locals.currentUser);
   res.redirect('/user/' + encodeURIComponent(name) + '?success=举报已提交');
+});
+
+// 关注/取消关注
+router.post('/follow/:name', (req, res) => {
+  const who = res.locals.currentUser;
+  if (who.startsWith('游客_')) return res.redirect('/login');
+  db.toggleFollow(who, req.params.name);
+  const back = req.get('Referer') || '/';
+  res.redirect(back);
 });
 
 module.exports = router;

@@ -6,6 +6,7 @@ const POSTS_FILE = path.join(DATA_DIR, 'posts.json');
 const REPLIES_FILE = path.join(DATA_DIR, 'replies.json');
 const MSGS_FILE = path.join(DATA_DIR, 'messages.json');
 const BM_FILE = path.join(DATA_DIR, 'bookmarks.json');
+const FOLLOWS_FILE = path.join(DATA_DIR, 'follows.json');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const ANN_FILE = path.join(DATA_DIR, 'announcements.json');
 const REPORT_FILE = path.join(DATA_DIR, 'reports.json');
@@ -43,6 +44,9 @@ function init() {
   }
   if (!fs.existsSync(ARTICLE_COMMENTS_FILE)) {
     fs.writeFileSync(ARTICLE_COMMENTS_FILE, '[]', 'utf-8');
+  }
+  if (!fs.existsSync(FOLLOWS_FILE)) {
+    fs.writeFileSync(FOLLOWS_FILE, '[]', 'utf-8');
   }
 }
 
@@ -401,6 +405,56 @@ function getBookmarkedPosts(username) {
 
 function getBookmarkCount(postId) {
   return readBookmarks().filter(b => b.post_id === Number(postId)).length;
+}
+
+// ===== 关注 =====
+function readFollows() {
+  init();
+  return JSON.parse(stripBOM(fs.readFileSync(FOLLOWS_FILE, 'utf-8')));
+}
+function writeFollows(follows) {
+  init();
+  fs.writeFileSync(FOLLOWS_FILE, JSON.stringify(follows, null, 2), { encoding: 'utf-8' });
+}
+function toggleFollow(follower, target) {
+  const follows = readFollows();
+  const idx = follows.findIndex(f => f.follower === follower && f.target === target);
+  if (idx === -1) {
+    follows.push({ id: nextId(follows), follower, target, created_at: now() });
+    writeFollows(follows);
+    return true;
+  } else {
+    follows.splice(idx, 1);
+    writeFollows(follows);
+    return false;
+  }
+}
+function isFollowing(follower, target) {
+  return readFollows().some(f => f.follower === follower && f.target === target);
+}
+function getFollowing(follower) {
+  return readFollows()
+    .filter(f => f.follower === follower)
+    .map(f => {
+      const u = getUserInfo(f.target);
+      return { username: f.target, realname: u ? u.realname : '', created_at: f.created_at };
+    })
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+function getFollowers(target) {
+  return readFollows()
+    .filter(f => f.target === target)
+    .map(f => {
+      const u = getUserInfo(f.follower);
+      return { username: f.follower, realname: u ? u.realname : '', created_at: f.created_at };
+    })
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+function getFollowingCount(username) {
+  return readFollows().filter(f => f.follower === username).length;
+}
+function getFollowerCount(username) {
+  return readFollows().filter(f => f.target === username).length;
 }
 
 // ===== 用户设置 =====
@@ -921,6 +975,12 @@ module.exports = {
   isBookmarked,
   getBookmarkedPosts,
   getBookmarkCount,
+  toggleFollow,
+  isFollowing,
+  getFollowing,
+  getFollowers,
+  getFollowingCount,
+  getFollowerCount,
   getAvatarColor,
   setAvatarColor,
   getAvatarUrl,

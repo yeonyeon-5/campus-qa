@@ -13,9 +13,15 @@
     <div style="color:var(--t3);font-size:13px">
       <%= posts.length %> 篇帖子 · <%= replyCount %> 条回复
       <% if (info && info.studentId) { %> · 学号 <%= info.studentId %><% } %>
+      · 👥 <%= followerCount %> 粉丝 · <%= followingCount %> 关注
     </div>
   </div>
-  <a href="/messages?tab=chats&chat=<%= encodeURIComponent(name) %>" class="btn btn-primary btn-sm" style="margin-left:auto">💬 私聊</a>
+  <% if (name !== currentUser) { %>
+    <form method="POST" action="/follow/<%= encodeURIComponent(name) %>" style="margin-left:auto">
+      <button class="btn btn-sm <%= isFollowing ? 'btn-ghost' : 'btn-primary' %>"><%= isFollowing ? '✓ 已关注' : '+ 关注' %></button>
+    </form>
+  <% } %>
+  <a href="/messages?tab=chats&chat=<%= encodeURIComponent(name) %>" class="btn btn-primary btn-sm">💬 私聊</a>
   <a href="/report/user/<%= encodeURIComponent(name) %>" class="btn btn-sm btn-warning" style="color:#dc2626">🚩 举报</a>
 </div>
 
