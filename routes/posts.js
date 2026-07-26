@@ -179,15 +179,31 @@ router.get('/me', (req, res) => {
   const tab = req.query.tab || 'posts';
   const authorPosts = db.getPostsByAuthor(who);
   const authorReplies = db.getRepliesByAuthor(who);
+  const authorArticles = db.getArticlesByAuthor(who);
   const bookmarkedPosts = db.getBookmarkedPosts(who);
   const notifications = db.getNotifications(who);
+  const articleNotifications = db.getArticleCommentNotifications(who);
+  const totalPostLikes = authorPosts.reduce((s, p) => s + (p.likes || []).length, 0);
+  const totalArticleLikes = authorArticles.reduce((s, a) => s + (a.likes || []).length, 0);
+  const totalArticleViews = authorArticles.reduce((s, a) => s + (a.views || 0), 0);
   res.render('me', {
     who, tab,
     posts: authorPosts,
     replies: authorReplies,
+    articles: authorArticles,
     bookmarks: bookmarkedPosts,
     notifications,
-    notFound: authorPosts.length === 0 && authorReplies.length === 0 && bookmarkedPosts.length === 0,
+    articleNotifications,
+    stats: {
+      postCount: authorPosts.length,
+      articleCount: authorArticles.length,
+      replyCount: authorReplies.length,
+      bookmarkCount: bookmarkedPosts.length,
+      totalPostLikes,
+      totalArticleLikes,
+      totalArticleViews
+    },
+    notFound: authorPosts.length === 0 && authorReplies.length === 0 && bookmarkedPosts.length === 0 && authorArticles.length === 0,
     success: req.query.success || null,
     error: req.query.error || null
   });

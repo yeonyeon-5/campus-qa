@@ -25,7 +25,12 @@
   </div>
   <div>
     <strong style="font-size:16px"><%= who %></strong>
-    <div style="color:var(--t3);font-size:13px"><%= posts.length %> 帖子 · <%= replies.length %> 回复 · <%= bookmarks.length %> 收藏</div>
+    <div style="color:var(--t3);font-size:13px">
+      <%= stats.postCount %> 帖子 · <%= stats.articleCount %> 文章 · <%= stats.replyCount %> 回复 · <%= stats.bookmarkCount %> 收藏
+    </div>
+    <div style="color:var(--t3);font-size:12px;margin-top:2px">
+      ❤️ <%= stats.totalPostLikes + stats.totalArticleLikes %> 赞 · 👁 <%= stats.totalArticleViews %> 阅读
+    </div>
   </div>
 </div>
 
@@ -52,9 +57,10 @@
 </div>
 
 <div class="tabs">
-  <a href="/me?tab=posts" class="tab <%= tab === 'posts' ? 'active' : '' %>">我的帖子</a>
-  <a href="/me?tab=replies" class="tab <%= tab === 'replies' ? 'active' : '' %>">我的回复</a>
-  <a href="/me?tab=bookmarks" class="tab <%= tab === 'bookmarks' ? 'active' : '' %>">我的收藏</a>
+  <a href="/me?tab=posts" class="tab <%= tab === 'posts' ? 'active' : '' %>">📝 帖子</a>
+  <a href="/me?tab=articles" class="tab <%= tab === 'articles' ? 'active' : '' %>">📄 文章</a>
+  <a href="/me?tab=replies" class="tab <%= tab === 'replies' ? 'active' : '' %>">💬 回复</a>
+  <a href="/me?tab=bookmarks" class="tab <%= tab === 'bookmarks' ? 'active' : '' %>">⭐ 收藏</a>
 </div>
 
 <% if (tab === 'posts') { %>
@@ -86,6 +92,38 @@
             </div>
           </div>
         </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+
+<% } else if (tab === 'articles') { %>
+  <% if (articles.length === 0) { %>
+    <div class="empty-state" style="padding:40px">
+      <p style="color:var(--t3)">还没有发布文章</p>
+      <a href="/blog/new" class="btn btn-primary btn-sm">去写文章</a>
+    </div>
+  <% } else { %>
+    <div class="post-list">
+      <% articles.forEach(a => { %>
+        <a href="/blog/<%= a.id %>" class="post-card">
+          <span class="post-card-avatar" style="background:var(--avatar<%= (a.author||'').length % 5 %>)"><%= (a.author||'?')[0] %></span>
+          <div class="post-card-main">
+            <h3 class="post-card-title"><%= a.title %></h3>
+            <p class="post-card-preview"><%= (a.summary || a.content || '').length > 100 ? (a.summary || a.content).slice(0, 100) + '...' : (a.summary || a.content || '') %></p>
+            <div class="post-card-meta">
+              <span>❤️ <%= (a.likes || []).length %></span>
+              <span class="post-card-dot">·</span>
+              <span>💬 <%= a.comment_count || 0 %> 评论</span>
+              <span class="post-card-dot">·</span>
+              <span>👁 <%= a.views || 0 %> 阅读</span>
+              <span class="post-card-dot">·</span>
+              <span><%= a.created_at %></span>
+              <% if (a.status === 'pending') { %><span class="badge badge-new">审核中</span><% } %>
+              <% if (a.status === 'rejected') { %><span class="badge badge-no">已驳回</span><% } %>
+            </div>
+          </div>
+        </a>
       <% }) %>
     </div>
   <% } %>
