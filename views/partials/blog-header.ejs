@@ -9,20 +9,39 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div style="background:#fafaf8;border-bottom:1px solid #eeede8;height:36px;display:flex;align-items:center;padding:0 24px">
-    <div style="max-width:960px;margin:0 auto;width:100%;display:flex;align-items:center;gap:16px;font-size:12px">
-      <a href="/" style="color:#706f6c;text-decoration:none;font-weight:600">首页</a>
-      <a href="/qa" style="color:#706f6c;text-decoration:none">问答</a>
-      <a href="/blog" style="color:#706f6c;text-decoration:none">博客</a>
-      <a href="/messages" style="color:#706f6c;text-decoration:none">消息</a>
-      <a href="/announcements" style="color:#706f6c;text-decoration:none">公告</a>
-      <a href="/me" style="color:#706f6c;text-decoration:none">我的</a>
-      <span style="flex:1"></span>
-      <span style="color:#a8a29e;font-size:11px"><%= typeof currentUser !== 'undefined' ? currentUser : '' %></span>
-      <a href="/logout" style="color:#ef4444;text-decoration:none;font-size:11px">退出</a>
+  <style>
+    .g-nav{position:sticky;top:0;z-index:101;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 40px;background:rgba(250,250,248,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);flex-wrap:nowrap;overflow-x:auto;border-bottom:1px solid #eeede8}
+    .g-brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;color:#1a1a1a;text-decoration:none;letter-spacing:-.02em;flex-shrink:0}
+    .g-brand svg{width:28px;height:28px;color:#f97316}
+    .g-links{display:flex;align-items:center;gap:2px;flex-shrink:0}
+    .g-links a{font-size:13px;color:#706f6c;text-decoration:none;padding:6px 15px;border-radius:8px;font-weight:500;transition:all .2s}
+    .g-links a:hover{color:#1a1a1a;background:rgba(0,0,0,.04)}
+    .g-user{font-size:12px;color:#94928f;margin-left:12px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    @media(max-width:640px){.g-nav{padding:0 14px;height:52px}.g-brand{font-size:15px;gap:6px}.g-brand svg{width:22px;height:22px}.g-links a{font-size:11px;padding:5px 10px}.g-user{font-size:10px;max-width:60px}}
+  </style>
+  <nav class="g-nav">
+    <a href="/" class="g-brand">
+      <svg viewBox="0 0 28 28" fill="none"><rect x="1" y="8" width="26" height="17" rx="4" fill="currentColor" opacity=".12"/><path d="M7 8V5a4 4 0 014-4h0a4 4 0 014 4v3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M1 12h26" stroke="currentColor" stroke-width="2.2"/><circle cx="14" cy="18" r="2.2" fill="currentColor"/></svg>
+      校园论坛
+    </a>
+    <div class="g-links">
+      <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+        <a href="/">首页</a>
+        <a href="/qa">问答</a>
+        <a href="/blog">博客</a>
+        <a href="/messages">消息</a>
+        <a href="/announcements">公告</a>
+        <a href="/me">我的</a>
+        <% if (currentUser === 'admin') { %><a href="/admin" style="color:#dc2626;font-weight:700">管理</a><% } %>
+        <span class="g-user"><%= currentUser %></span>
+        <a href="/logout" style="color:#ef4444;margin-left:8px">退出</a>
+      <% } else { %>
+        <a href="/login">登录</a>
+        <a href="/register">注册</a>
+      <% } %>
     </div>
-  </div>
-  <nav class="navbar">
+  </nav>
+  <nav class="navbar" style="border-top:none">
     <div class="container nav-inner">
       <a href="/" class="nav-brand">
         <svg class="nav-logo" viewBox="0 0 32 32" fill="none"><rect x="2" y="10" width="28" height="18" rx="3" fill="white" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 014-4h0a4 4 0 014 4v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 14h28" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="20" r="2" fill="currentColor"/></svg>
@@ -32,15 +51,9 @@
         <input type="text" name="q" class="nav-search-input" placeholder="搜索文章..." value="<%= typeof query !== 'undefined' ? query : '' %>">
       </form>
       <div class="nav-links">
-        <a href="/" class="nav-link">首页</a>
-        <a href="/qa" class="nav-link">问答</a>
-        <a href="/blog" class="nav-link active">博客</a>
-        <a href="/messages" class="nav-link">消息</a>
-        <a href="/me" class="nav-link">我的</a>
+        <a href="/blog" class="nav-link active">博客首页</a>
         <a href="/blog/new" class="nav-link" style="background:var(--s);color:#fff;border-radius:20px;padding:6px 16px;font-weight:700">写文章</a>
-        <% if (typeof currentUser !== 'undefined' && currentUser === 'admin') { %><a href="/admin" class="nav-link" style="color:#dc2626;font-weight:700">管理</a><% } %>
         <span class="nav-user"><%= typeof currentUser !== 'undefined' ? currentUser : '' %></span>
-        <a href="/logout" class="nav-link" style="color:#ef4444">退出</a>
       </div>
     </div>
   </nav>
