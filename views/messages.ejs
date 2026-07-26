@@ -1,5 +1,5 @@
-<% const base = '/messages'; %>
-<%- include('partials/main-header') %>
+<% const _blog = typeof isBlog !== 'undefined' && isBlog; const base = _blog ? '/blog/messages' : '/messages'; %>
+<%- include(_blog ? 'partials/blog-header' : 'partials/main-header') %>
 
 <div style="max-width:960px;margin:0 auto;padding:24px 24px 0;width:100%">
 <div class="page-header">
@@ -104,7 +104,7 @@
 <% } %>
 
 </div>
-<%- include('partials/main-footer') %>
+<%- include(_blog ? 'partials/blog-footer' : 'partials/main-footer') %>
 
 <script>
 (function(){
