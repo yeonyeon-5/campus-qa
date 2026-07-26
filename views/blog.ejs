@@ -24,7 +24,7 @@
   <% categories.forEach(c => { %>
     <a href="/blog<%= c !== '全部' ? '?cat=' + c : '' %>"
        style="padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;
-              <%= (currentCat === c) ? 'background:var(--s);color:#fff' : 'background:var(--card);color:var(--t2);border:1px solid var(--b)' %>">
+              <%= (currentCat === c) ? 'background:var(--p);color:#fff' : 'background:var(--card);color:var(--t2);border:1px solid var(--b)' %>">
       <%= c %>
     </a>
   <% }) %>
