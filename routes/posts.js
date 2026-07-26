@@ -183,14 +183,24 @@ router.get('/me', (req, res) => {
   const bookmarkedPosts = db.getBookmarkedPosts(who);
   const notifications = db.getNotifications(who);
   const articleNotifications = db.getArticleCommentNotifications(who);
+  // 给每个帖子附加点赞数和收藏数
+  const postsWithStats = authorPosts.map(p => ({
+    ...p,
+    like_count: (p.likes || []).length,
+    bookmark_count: db.getBookmarkCount(p.id)
+  }));
+  const articlesWithStats = authorArticles.map(a => ({
+    ...a,
+    like_count: (a.likes || []).length
+  }));
   const totalPostLikes = authorPosts.reduce((s, p) => s + (p.likes || []).length, 0);
   const totalArticleLikes = authorArticles.reduce((s, a) => s + (a.likes || []).length, 0);
   const totalArticleViews = authorArticles.reduce((s, a) => s + (a.views || 0), 0);
   res.render('me', {
     who, tab,
-    posts: authorPosts,
+    posts: postsWithStats,
     replies: authorReplies,
-    articles: authorArticles,
+    articles: articlesWithStats,
     bookmarks: bookmarkedPosts,
     notifications,
     articleNotifications,

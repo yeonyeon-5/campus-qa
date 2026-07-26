@@ -26,7 +26,7 @@
   <div>
     <strong style="font-size:16px"><%= who %></strong>
     <div style="color:var(--t3);font-size:13px">
-      <%= stats.postCount %> 帖子 · <%= stats.articleCount %> 文章 · <%= stats.replyCount %> 回复 · <%= stats.bookmarkCount %> 收藏
+      <%= stats.postCount %> 帖子 · <%= stats.articleCount %> 文章 · <%= stats.replyCount %> 评论 · <%= stats.bookmarkCount %> 收藏
     </div>
     <div style="color:var(--t3);font-size:12px;margin-top:2px">
       ❤️ <%= stats.totalPostLikes + stats.totalArticleLikes %> 赞 · 👁 <%= stats.totalArticleViews %> 阅读
@@ -59,7 +59,7 @@
 <div class="tabs">
   <a href="/me?tab=posts" class="tab <%= tab === 'posts' ? 'active' : '' %>">📝 帖子</a>
   <a href="/me?tab=articles" class="tab <%= tab === 'articles' ? 'active' : '' %>">📄 文章</a>
-  <a href="/me?tab=replies" class="tab <%= tab === 'replies' ? 'active' : '' %>">💬 回复</a>
+  <a href="/me?tab=replies" class="tab <%= tab === 'replies' ? 'active' : '' %>">💬 评论</a>
   <a href="/me?tab=bookmarks" class="tab <%= tab === 'bookmarks' ? 'active' : '' %>">⭐ 收藏</a>
 </div>
 
@@ -80,7 +80,11 @@
               <p class="post-card-preview"><%= post.content.length > 100 ? post.content.slice(0, 100) + '...' : post.content %></p>
             </a>
             <div class="post-card-meta">
-              <span><%= post.reply_count %> 条回复</span>
+              <span>❤️ <%= post.like_count %></span>
+              <span class="post-card-dot">·</span>
+              <span>💬 <%= post.reply_count %></span>
+              <span class="post-card-dot">·</span>
+              <span>⭐ <%= post.bookmark_count %></span>
               <span class="post-card-dot">·</span>
               <span><%= post.created_at %></span>
               <% if (post.status === 'pending') { %><span class="badge badge-new">审核中</span><% } %>
