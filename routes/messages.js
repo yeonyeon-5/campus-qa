@@ -5,7 +5,8 @@ const db = require('../db');
 // 消息中心首页
 router.get('/', (req, res) => {
   const who = res.locals.currentUser;
-  const tab = req.query.tab || 'notifications';
+  const isBlog = req.baseUrl.startsWith('/blog');
+  const tab = req.query.tab || (isBlog ? 'chats' : 'notifications');
   const notifications = db.getNotifications(who);
   const chatList = db.getChatList(who);
 

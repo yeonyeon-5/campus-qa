@@ -14,8 +14,10 @@
 <% } %>
 
 <div class="tabs">
-  <a href="<%= base %>?tab=notifications" class="tab <%= tab === 'notifications' ? 'active' : '' %>">📬 回复通知 <span class="badge badge-new" style="margin-left:6px"><%= notifications.length %></span></a>
-  <a href="<%= base %>?tab=chats" class="tab <%= tab === 'chats' ? 'active' : '' %>">💬 私聊</a>
+  <% if (!isBlog) { %>
+    <a href="<%= base %>?tab=notifications" class="tab <%= tab === 'notifications' ? 'active' : '' %>">📬 回复通知 <span class="badge badge-new" style="margin-left:6px"><%= notifications.length %></span></a>
+  <% } %>
+  <a href="<%= base %>?tab=chats" class="tab <%= tab === 'chats' || isBlog ? 'active' : '' %>">💬 私聊</a>
 </div>
 
 <% if (tab === 'notifications') { %>
