@@ -799,6 +799,19 @@ function getArticleComments(articleId) {
     .sort((a, b) => a.id - b.id);
 }
 
+function getArticleCommentNotifications(author) {
+  const myArticles = readArticles().filter(a => a.author === author);
+  const myArticleIds = myArticles.map(a => a.id);
+  const allComments = readArticleComments().filter(c => myArticleIds.includes(c.article_id));
+  const othersComments = allComments.filter(c => c.author !== author);
+  return othersComments
+    .map(c => {
+      const article = myArticles.find(a => a.id === c.article_id);
+      return { ...c, article_title: article ? article.title : '(已删除)' };
+    })
+    .sort((a, b) => b.id - a.id);
+}
+
 function createArticleComment(articleId, content, author) {
   const comments = readArticleComments();
   const comment = {
@@ -944,6 +957,7 @@ module.exports = {
   toggleArticleHidden,
   getPendingArticles,
   getArticleComments,
+  getArticleCommentNotifications,
   createArticleComment,
   toggleLikeArticle,
   toggleLikeArticleComment,

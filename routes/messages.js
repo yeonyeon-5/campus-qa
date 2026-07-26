@@ -8,6 +8,7 @@ router.get('/', (req, res) => {
   const isBlog = req.baseUrl.startsWith('/blog');
   const tab = req.query.tab || (isBlog ? 'chats' : 'notifications');
   const notifications = db.getNotifications(who);
+  const articleNotifications = db.getArticleCommentNotifications(who);
   const chatList = db.getChatList(who);
 
   // 私聊对话
@@ -21,6 +22,7 @@ router.get('/', (req, res) => {
     who,
     tab,
     notifications,
+    articleNotifications,
     chatList,
     chatWith,
     chatMessages,
