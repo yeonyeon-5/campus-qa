@@ -24,6 +24,7 @@ router.get('/', (req, res) => {
     chatList,
     chatWith,
     chatMessages,
+    isBlog,
     success: req.query.success || null,
     error: req.query.error || null
   });

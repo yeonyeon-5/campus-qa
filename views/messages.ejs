@@ -1,9 +1,9 @@
-<% const isBlog = typeof currentPath !== 'undefined' && currentPath.startsWith('/blog'); const base = isBlog ? '/blog/messages' : '/messages'; %>
-<%- include(isBlog ? 'partials/blog-header' : 'partials/header') %>
+<% const _blog = typeof isBlog !== 'undefined' && isBlog; const base = _blog ? '/blog/messages' : '/messages'; %>
+<%- include(_blog ? 'partials/blog-header' : 'partials/header') %>
 
 <div class="page-header">
   <h1>消息中心</h1>
-  <a href="<%= isBlog ? '/blog' : '/' %>" class="text-link">← 返回<%= isBlog ? '博客' : '首页' %></a>
+  <a href="<%= _blog ? '/blog' : '/' %>" class="text-link">← 返回<%= _blog ? '博客' : '首页' %></a>
 </div>
 
 <% if (success) { %>
@@ -14,10 +14,10 @@
 <% } %>
 
 <div class="tabs">
-  <% if (!isBlog) { %>
+  <% if (!_blog) { %>
     <a href="<%= base %>?tab=notifications" class="tab <%= tab === 'notifications' ? 'active' : '' %>">📬 回复通知 <span class="badge badge-new" style="margin-left:6px"><%= notifications.length %></span></a>
   <% } %>
-  <a href="<%= base %>?tab=chats" class="tab <%= tab === 'chats' || isBlog ? 'active' : '' %>">💬 私聊</a>
+  <a href="<%= base %>?tab=chats" class="tab <%= tab === 'chats' || _blog ? 'active' : '' %>">💬 私聊</a>
 </div>
 
 <% if (tab === 'notifications') { %>
@@ -101,7 +101,7 @@
   <% } %>
 <% } %>
 
-<%- include(isBlog ? 'partials/blog-footer' : 'partials/footer') %>
+<%- include(_blog ? 'partials/blog-footer' : 'partials/footer') %>
 
 <script>
 (function(){
