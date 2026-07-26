@@ -54,7 +54,6 @@
       </form>
       <div class="nav-links">
         <a href="/qa" class="nav-link <%= currentPath === '/qa' ? 'active' : '' %>">问答首页</a>
-        <a href="/announcements" class="nav-link <%= currentPath === '/announcements' ? 'active' : '' %>">公告</a>
         <% if (currentUser !== 'admin') { %>
           <a href="/new" class="nav-link <%= currentPath === '/new' ? 'active' : '' %>">提问</a>
         <% } %>
