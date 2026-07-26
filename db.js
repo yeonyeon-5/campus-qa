@@ -778,6 +778,15 @@ function rejectArticle(id, reason) {
   return true;
 }
 
+function toggleArticleHidden(id) {
+  const articles = readArticles();
+  const article = articles.find(a => a.id === Number(id));
+  if (!article) return null;
+  article.is_hidden = !article.is_hidden;
+  writeArticles(articles);
+  return article.is_hidden;
+}
+
 function getPendingArticles() {
   return readArticles()
     .filter(a => a.status === 'pending')
@@ -932,6 +941,7 @@ module.exports = {
   createArticle,
   approveArticle,
   rejectArticle,
+  toggleArticleHidden,
   getPendingArticles,
   getArticleComments,
   createArticleComment,

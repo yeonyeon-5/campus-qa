@@ -53,8 +53,14 @@
     <span class="brand">⚙️ 管理后台</span>
     <nav class="nav-links">
       <a href="/admin/dashboard" class="<%= page === 'dashboard' ? 'active' : '' %>">📊 仪表盘</a>
-      <a href="/admin/review" class="<%= page === 'review' ? 'active' : '' %>">⏳ 审核</a>
+      <span style="color:var(--b);margin:0 2px;font-size:18px">|</span>
+      <span style="font-size:10px;color:var(--t3);padding:0 4px;letter-spacing:.06em">问答</span>
+      <a href="/admin/review" class="<%= page === 'review' ? 'active' : '' %>">⏳ 待审</a>
       <a href="/admin/posts" class="<%= page === 'posts' ? 'active' : '' %>">📝 帖子</a>
+      <span style="font-size:10px;color:var(--t3);padding:0 4px;letter-spacing:.06em">博客</span>
+      <a href="/admin/articles/review" class="<%= page === 'articles-review' ? 'active' : '' %>">⏳ 待审</a>
+      <a href="/admin/articles" class="<%= page === 'articles' ? 'active' : '' %>">📄 文章</a>
+      <span style="color:var(--b);margin:0 2px;font-size:18px">|</span>
       <a href="/admin/users" class="<%= page === 'users' ? 'active' : '' %>">👥 用户</a>
       <a href="/admin/announcements" class="<%= page === 'announcements' ? 'active' : '' %>">📢 公告</a>
       <a href="/admin/reports" class="<%= page === 'reports' ? 'active' : '' %>">🚩 举报</a>

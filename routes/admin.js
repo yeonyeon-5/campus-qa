@@ -15,6 +15,8 @@ router.get('/', (req, res) => res.redirect('/admin/dashboard'));
 // ===== 仪表盘 =====
 router.get('/dashboard', (req, res) => {
   const ranked = db.getPostsWithHeat();
+  const allArticles = db.getVisibleArticles(null);
+  const pendingArticles = db.getPendingArticles();
   const stats = {
     total: ranked.length,
     visible: ranked.filter(p => !p.is_hidden || p.status === 'approved').length,
@@ -22,6 +24,8 @@ router.get('/dashboard', (req, res) => {
     totalHeat: ranked.reduce((s, p) => s + p.heat, 0),
     totalReplies: ranked.reduce((s, p) => s + p.reply_count, 0),
     totalLikes: ranked.reduce((s, p) => s + p.like_count, 0),
+    blogTotal: allArticles.length,
+    blogPending: pendingArticles.length,
   };
   res.render('admin-dashboard', { page: 'dashboard', ranked, stats });
 });
@@ -129,6 +133,39 @@ router.post('/reports/bulk', (req, res) => {
   }
   db.handleAllReportsForTarget(type, target_id);
   res.redirect('/admin/reports?message=已处理并移入历史');
+});
+
+// ===== 博客文章审核 =====
+router.get('/articles/review', (req, res) => {
+  const pending = db.getPendingArticles();
+  res.render('admin-articles-review', { page: 'articles-review', pending, message: req.query.message });
+});
+
+router.post('/articles/review/:id/approve', (req, res) => {
+  db.approveArticle(req.params.id);
+  res.redirect('/admin/articles/review?message=文章审核通过');
+});
+
+router.post('/articles/review/:id/reject', (req, res) => {
+  db.rejectArticle(req.params.id, (req.body.reason || '').trim());
+  res.redirect('/admin/articles/review?message=文章已驳回');
+});
+
+// ===== 博客文章管理 =====
+router.get('/articles', (req, res) => {
+  const articles = db.getVisibleArticles(null);
+  res.render('admin-articles', { page: 'articles', articles, message: req.query.message });
+});
+
+router.post('/articles/:id/toggle', (req, res) => {
+  const result = db.toggleArticleHidden(req.params.id);
+  const act = result ? '已隐藏' : '已显示';
+  res.redirect('/admin/articles?message=文章' + act);
+});
+
+router.post('/articles/:id/delete', (req, res) => {
+  db.adminDeleteArticle(req.params.id);
+  res.redirect('/admin/articles?message=文章已删除');
 });
 
 module.exports = router;
