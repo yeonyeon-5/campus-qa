@@ -10,22 +10,23 @@ router.get('/login', (req, res) => {
   res.render('login', { error: null, form: {} });
 });
 
-// 密码登录
+// 手机号登录
 router.post('/login', (req, res) => {
-  const username = (req.body.username || '').trim();
+  const phone = (req.body.phone || '').trim();
   const password = (req.body.password || '').trim();
-  if (!username || !password) {
-    return res.render('login', { error: '请输入账号和密码', form: { username } });
+  if (!phone || !password) {
+    return res.render('login', { error: '请输入手机号和密码', form: { phone } });
   }
-  const v = db.verifyLogin(username, password);
+  const v = db.verifyLogin(phone, password);
   if (v === 'banned') {
-    return res.render('login', { error: '该账号已被封禁，无法登录', form: { username } });
+    return res.render('login', { error: '该账号已被封禁，无法登录', form: { phone } });
   }
   if (v) {
-    res.cookie('user', username, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+    const nickname = db.getUserNickname(phone) || phone;
+    res.cookie('user', nickname, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
     return res.redirect('/');
   }
-  res.render('login', { error: '账号或密码错误', form: { username } });
+  res.render('login', { error: '手机号或密码错误', form: { phone } });
 });
 
 // 游客登录
@@ -46,37 +47,35 @@ router.get('/register', (req, res) => {
 
 // 注册提交
 router.post('/register', (req, res) => {
-  const username = (req.body.username || '').trim();
+  const phone = (req.body.phone || '').trim();
   const password = (req.body.password || '').trim();
   const password2 = (req.body.password2 || '').trim();
-  const realname = (req.body.realname || '').trim();
-  const studentId = (req.body.studentId || '').trim();
+  const nickname = (req.body.nickname || '').trim();
 
-  if (!username || !password || !realname) {
-    return res.render('register', { error: '请填写完整信息（姓名必填）', form: { username, realname, studentId } });
+  const fd = { phone, nickname };
+
+  if (!phone || !password || !nickname) {
+    return res.render('register', { error: '请填写完整信息', form: fd });
   }
-  if (realname.length < 2) {
-    return res.render('register', { error: '请填写真实姓名', form: { username, realname, studentId } });
+  if (!/^1\d{10}$/.test(phone)) {
+    return res.render('register', { error: '请输入正确的11位手机号', form: fd });
   }
-  if (username.length < 2 || username.length > 20) {
-    return res.render('register', { error: '账号需 2-20 个字符', form: { username, realname, studentId } });
-  }
-  if (username.startsWith('游客_')) {
-    return res.render('register', { error: '账号不能以"游客_"开头，请换一个', form: { username, realname, studentId } });
+  if (nickname.length < 2 || nickname.length > 20) {
+    return res.render('register', { error: '昵称需 2-20 个字符', form: fd });
   }
   if (password.length < 4) {
-    return res.render('register', { error: '密码至少 4 位', form: { username, realname, studentId } });
+    return res.render('register', { error: '密码至少 4 位', form: fd });
   }
   if (password !== password2) {
-    return res.render('register', { error: '两次密码不一致', form: { username, realname, studentId } });
+    return res.render('register', { error: '两次密码不一致', form: fd });
   }
 
-  const result = db.registerUser(username, password, realname, studentId);
+  const result = db.registerUser(phone, password, nickname, '');
   if (!result) {
-    return res.render('register', { error: '该账号已被注册，请换一个', form: { username, realname, studentId } });
+    return res.render('register', { error: '该手机号已被注册', form: fd });
   }
 
-  res.cookie('user', username, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+  res.cookie('user', nickname, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
   res.redirect('/?success=注册成功，欢迎加入！');
 });
 

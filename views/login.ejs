@@ -42,8 +42,8 @@
     <% if (error) { %><div class="login-error"><%= error %></div><% } %>
     <form method="POST" action="/login" class="login-form">
       <div class="form-group">
-        <label for="username">账号</label>
-        <input type="text" id="username" name="username" class="login-input" placeholder="输入账号" maxlength="20" required autofocus value="<%= form.username || '' %>">
+        <label for="phone">手机号</label>
+        <input type="tel" id="phone" name="phone" class="login-input" placeholder="输入手机号" maxlength="11" required autofocus value="<%= form.phone || '' %>">
       </div>
       <div class="form-group">
         <label for="password">密码</label>
@@ -55,7 +55,7 @@
     <form method="POST" action="/login/guest">
       <button type="submit" class="guest-btn">👋 游客身份进入</button>
     </form>
-    <p class="login-footer">还没有账号？<a href="/register">立即注册</a> · 游客可浏览，发帖和评论需实名登录</p>
+    <p class="login-footer">还没有账号？<a href="/register">立即注册</a> · 游客可浏览，登录后方可发帖、评论、点赞、收藏、私聊</p>
   </div>
 </body>
 </html>

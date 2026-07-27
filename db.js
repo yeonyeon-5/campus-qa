@@ -470,26 +470,32 @@ function writeUsers(users) {
   init();
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), { encoding: 'utf-8' });
 }
-function registerUser(username, password, realname, studentId) {
+function registerUser(phone, password, nickname, studentId) {
   const users = readUsers();
-  if (users[username]) return null; // 已存在
+  if (users[phone]) return null; // 已存在
   const salt = crypto.randomBytes(16).toString('hex');
-  users[username] = {
+  users[phone] = {
     passwordHash: hashPassword(password, salt),
     salt: salt,
-    realname: realname || '',
+    nickname: nickname || '',
+    realname: nickname || '',
     studentId: studentId || '',
-    avatarColor: username.length % 5,
+    avatarColor: phone.length % 5,
     avatarUrl: null
   };
   writeUsers(users);
   return true;
 }
+function getUserNickname(phone) {
+  const users = readUsers();
+  const u = users[phone];
+  return u ? (u.nickname || u.realname || phone) : null;
+}
 function getUserInfo(username) {
   const users = readUsers();
   const u = users[username];
   if (!u) return null;
-  return { realname: u.realname || '', studentId: u.studentId || '' };
+  return { realname: u.nickname || u.realname || '', studentId: u.studentId || '' };
 }
 function verifyLogin(username, password) {
   const users = readUsers();
@@ -986,6 +992,7 @@ module.exports = {
   getAvatarUrl,
   setAvatarUrl,
   registerUser,
+  getUserNickname,
   verifyLogin,
   getUserInfo,
   isUserMuted,

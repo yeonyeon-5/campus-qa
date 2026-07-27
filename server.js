@@ -8,7 +8,7 @@ const adminRouter = require('./routes/admin');
 const messagesRouter = require('./routes/messages');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 
 // 视图引擎
 app.set('view engine', 'ejs');
